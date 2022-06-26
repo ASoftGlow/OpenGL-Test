@@ -5,15 +5,14 @@ layout (location = 2) in float tile;
 
 out vec2 TexCoord;
 
-uniform float scale;
-uniform int window_w;
-uniform int window_h;
+uniform float scale_x;
+uniform float scale_y;
 
 
 void main()
 {
-   float x = aPos.x / (window_w/100) * scale;
-   float y = aPos.y / (window_h/100) * scale;
+   float x = aPos.x * scale_x;
+   float y = aPos.y * scale_y;
 
    gl_Position = vec4(x, y, 0, 1.0);
    TexCoord = aTexCoord;

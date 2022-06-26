@@ -18,9 +18,9 @@ void processInput(GLFWwindow* window);
 
 int main()
 {
-    int WINDOW_WIDTH =  600;
+    int WINDOW_WIDTH  = 600;
     int WINDOW_HEIGHT = 600;
-    float SCALE = 3;
+    float SCALE = 9;
 
 
 
@@ -29,7 +29,7 @@ int main()
 
     const unsigned int WIDTH = 4, HEIGHT = 4;
 
-    const char vr_rots[4][3][2] = {
+    const unsigned char vr_rots[4][3][2] = {
         0, 0, // 0
         0, 1,
         1, 1,
@@ -47,7 +47,7 @@ int main()
         1, 0,
     };
 
-    const char tx_rots[4][3][2] = {
+    const unsigned char tx_rots[4][3][2] = {
         0, 0, // 0
         0, 1,
         1, 1,
@@ -72,12 +72,14 @@ int main()
         {{0,0},{0,0},{2,0},{1,0}}
     };
 
+    unsigned int ind;
+    unsigned char rot;
     const unsigned short TOTAL_TILES = 5;
     float vertices[HEIGHT * WIDTH * 2 * 3 * 5]{};
-    unsigned int ind;
-    unsigned char r;
-    float scale_x = 1.0f / (WIDTH*8) * (WINDOW_WIDTH/100.0f);
-    float scale_y = 1.0f / (HEIGHT*8) * (WINDOW_HEIGHT/100.0f);
+    float scale_x = 1.0f / (WIDTH*8);
+    float scale_y = 1.0f / (HEIGHT*8);
+    float offset_x = WIDTH / -2.0f;
+    float offset_y = HEIGHT / -2.0f;
 
 
     for (unsigned int y = 0; y != HEIGHT; y++) {
@@ -87,25 +89,25 @@ int main()
 
                 ind = (x + y * WIDTH) * 2*3*5 + j * 3*5;
 
-                r = tiles[y][x][1];
+                rot = tiles[y][x][1];
 
 
-                vertices[ind + 0 + 0] = (x + vr_rots[r][0][0]) * scale_x;
-                vertices[ind + 0 + 1] = (y + vr_rots[r][0][1]) * scale_y;
-                vertices[ind + 0 + 2] = (tx_rots[r][0][0] + tiles[y][x][0]) / static_cast<float>(TOTAL_TILES);
-                vertices[ind + 0 + 3] = tx_rots[r][0][1];
+                vertices[ind + 0 + 0] = (x + vr_rots[rot][0][0] + offset_x) * scale_x;
+                vertices[ind + 0 + 1] = (y + vr_rots[rot][0][1] + offset_y) * scale_y;
+                vertices[ind + 0 + 2] = (tx_rots[rot][0][0] + tiles[y][x][0]) / float (TOTAL_TILES);
+                vertices[ind + 0 + 3] = tx_rots[rot][0][1];
                 vertices[ind + 0 + 4] = 0;
                 
-                vertices[ind + 5 + 0] = (x + (j ? 1-vr_rots[r][1][0]: vr_rots[r][1][0])) * scale_x;
-                vertices[ind + 5 + 1] = (y + (j ? 1-vr_rots[r][1][1]: vr_rots[r][1][1])) * scale_y;
-                vertices[ind + 5 + 2] = ((j ? 1-tx_rots[r][1][0]: tx_rots[r][1][0]) + tiles[y][x][0]) / static_cast<float>(TOTAL_TILES);
-                vertices[ind + 5 + 3] = (j ? 1.0f-tx_rots[r][1][1]: tx_rots[r][1][1]);  
+                vertices[ind + 5 + 0] = (x + (j ? 1-vr_rots[rot][1][0]: vr_rots[rot][1][0]) + offset_x) * scale_x;
+                vertices[ind + 5 + 1] = (y + (j ? 1-vr_rots[rot][1][1]: vr_rots[rot][1][1]) + offset_y) * scale_y;
+                vertices[ind + 5 + 2] = ((j ? 1-tx_rots[rot][1][0]: tx_rots[rot][1][0]) + tiles[y][x][0]) / float (TOTAL_TILES);
+                vertices[ind + 5 + 3] = (j ? 1.0f-tx_rots[rot][1][1]: tx_rots[rot][1][1]);  
                 vertices[ind + 5 + 4] = 0;
 
-                vertices[ind + 10 + 0] = (x + vr_rots[r][2][0]) * scale_x;
-                vertices[ind + 10 + 1] = (y + vr_rots[r][2][1]) * scale_y;
-                vertices[ind + 10 + 2] = (tx_rots[r][2][0] + tiles[y][x][0]) / static_cast<float>(TOTAL_TILES);
-                vertices[ind + 10 + 3] = tx_rots[r][2][1];  
+                vertices[ind + 10 + 0] = (x + vr_rots[rot][2][0] + offset_x) * scale_x;
+                vertices[ind + 10 + 1] = (y + vr_rots[rot][2][1] + offset_y) * scale_y;
+                vertices[ind + 10 + 2] = (tx_rots[rot][2][0] + tiles[y][x][0]) / float (TOTAL_TILES);
+                vertices[ind + 10 + 3] = tx_rots[rot][2][1];  
                 vertices[ind + 10 + 4] = 0;
             };
         };
@@ -242,6 +244,8 @@ int main()
     double timeValue = glfwGetTime(), pastTime = timeValue;
     int frames = 0, fps;
 
+    shaderProgram.use();
+
 
     while (!glfwWindowShouldClose(window))
     {
@@ -260,15 +264,14 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
 
-        shaderProgram.use();
-
-        timeValue = glfwGetTime();
-        SCALE = 5*sin(timeValue)+5+1;
-        shaderProgram.setFloat("scale", SCALE);
 
         glfwGetFramebufferSize(window, &WINDOW_WIDTH, &WINDOW_HEIGHT);
-        shaderProgram.setInt("window_w", WINDOW_WIDTH);
-        shaderProgram.setInt("window_h", WINDOW_HEIGHT);
+        //timeValue = glfwGetTime();
+        //SCALE = 5*sin(timeValue/10)+5+1;
+        shaderProgram.setFloat("scale_x", SCALE * (600.0f / WINDOW_WIDTH));
+        shaderProgram.setFloat("scale_y", SCALE * (600.0f / WINDOW_HEIGHT));
+
+        // TODO: only set when fb size changed
         
         
         glBindVertexArray(VAOs[0]);
