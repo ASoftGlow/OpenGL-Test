@@ -1,49 +1,112 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="Terrain Generation">
+      <UniqueIdentifier>{ce8c3fdb-d721-42ce-a74c-528c64ee43e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="Terrain Generation\Header Files">
+      <UniqueIdentifier>{9b42d9d8-ea82-49a3-b27f-f9189544059b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Terrain Generation\Source Files">
+      <UniqueIdentifier>{ea7a8336-ce30-4fec-983b-c793a2fd33b2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{76d0353f-b4fa-4cd5-994d-399f08204a60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Rendering\Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Rendering\Source Files\Shaders Files">
+      <UniqueIdentifier>{c8d21ec4-e33d-404f-b1eb-b370662a6558}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Rendering\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="texture_c.cpp">
+      <Filter>Rendering\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="shader_c.cpp">
+      <Filter>Rendering\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="resources.cpp">
+      <Filter>Rendering\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Rendering\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\OpenGL\src\glad.c">
       <Filter>Resource Files</Filter>
     </ClCompile>
-    <ClCompile Include="textures.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="terrain_renderer.cpp">
+      <Filter>Rendering\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="terrain.cpp">
+      <Filter>Terrain Generation\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sprite_renderer.cpp">
+      <Filter>Rendering\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\OpenGL\src\stb_image.h">
-      <Filter>Resource Files</Filter>
+    <ClInclude Include="Game.h">
+      <Filter>Rendering\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="shader_c.h">
+      <Filter>Rendering\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resources.hpp">
+      <Filter>Rendering\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="texture_c.h">
+      <Filter>Rendering\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\OpenGL\includes\stb_image.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sprite_renderer.h">
+      <Filter>Rendering\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="terrain_renderer.h">
+      <Filter>Rendering\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Wave Function Collapse\Wave Function Collapse\tile.h">
+      <Filter>Terrain Generation\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="terrain.h">
+      <Filter>Terrain Generation\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Terrain Generation\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="atlas.png">
-      <Filter>Resource Files</Filter>
-    </Image>
+    <None Include="fragment.frag">
+      <Filter>Rendering\Source Files\Shaders Files</Filter>
+    </None>
+    <None Include="terrain.frag">
+      <Filter>Rendering\Source Files\Shaders Files</Filter>
+    </None>
+    <None Include="terrain.vert">
+      <Filter>Rendering\Source Files\Shaders Files</Filter>
+    </None>
+    <None Include="vertex.vert">
+      <Filter>Rendering\Source Files\Shaders Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vertex.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="fragment.frag">
-      <Filter>Source Files</Filter>
-    </None>
+    <Image Include="assets\atlas.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
