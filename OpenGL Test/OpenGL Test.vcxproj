@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -20,21 +20,37 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\..\OpenGL\src\glad.c" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="textures.cpp" />
+    <ClCompile Include="resources.cpp" />
+    <ClCompile Include="shader_c.cpp" />
+    <ClCompile Include="sprite_renderer.cpp" />
+    <ClCompile Include="terrain.cpp" />
+    <ClCompile Include="terrain_renderer.cpp" />
+    <ClCompile Include="texture_c.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\OpenGL\src\stb_image.h" />
+    <ClInclude Include="..\..\..\..\..\..\OpenGL\includes\stb_image.h" />
+    <ClInclude Include="..\..\Wave Function Collapse\Wave Function Collapse\tile.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="resources.hpp" />
     <ClInclude Include="shader_c.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="atlas.png" />
+    <ClInclude Include="sprite_renderer.h" />
+    <ClInclude Include="terrain.h" />
+    <ClInclude Include="terrain_renderer.h" />
+    <ClInclude Include="texture_c.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.frag" />
+    <None Include="terrain.frag" />
+    <None Include="terrain.vert" />
     <None Include="vertex.vert">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\atlas.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -98,7 +114,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\OpenGL\includes;C:\Users\hankv\source\repos\OpenGL Test\OpenGL Test;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\hankv\source\repos\OpenGL Test\OpenGL Test;C:\OpenGL\includes;C:\Users\hankv\source\repos\OpenGL Test\OpenGL Test;$(IncludePath)</IncludePath>
     <LibraryPath>C:\OpenGL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
