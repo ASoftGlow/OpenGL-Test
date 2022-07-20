@@ -22,13 +22,12 @@ Game game;
 
 const unsigned int WIDTH = 16, HEIGHT = 16;
 
-int WINDOW_WIDTH = 600;
-int WINDOW_HEIGHT = 600;
+int WINDOW_WIDTH = 600, WINDOW_HEIGHT = 600;
 
 
 int main()
 {
-
+    srand(0);
 
 
     /*const unsigned char vr_rots[4][3][2] = {

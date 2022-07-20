@@ -1,6 +1,6 @@
 #include "sprite_renderer.h"
 
-#define TOTAL_TILES 6;
+const unsigned char TOTAL_TILES = 6;
 
 
 SpriteRenderer::SpriteRenderer(Shader& shader)

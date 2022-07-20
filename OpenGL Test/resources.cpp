@@ -47,9 +47,9 @@ Shader Resources::loadShader(const char* vShaderPath, const char* fShaderPath, s
 }
 
 
-Shader Resources::getShader(std::string name)
+Shader* Resources::getShader(std::string name)
 {
-    return shaders[name];
+    return &shaders[name];
 }
 
 
@@ -87,9 +87,9 @@ Texture Resources::loadTexture(const char* filePath, bool alpha, std::string nam
 }
 
 
-Texture Resources::getTexture(std::string name)
+Texture* Resources::getTexture(std::string name)
 {
-    return textures[name];
+    return &textures[name];
 }
 
 
