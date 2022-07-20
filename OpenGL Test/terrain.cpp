@@ -12,26 +12,8 @@ Terrain::Terrain(int H, int W)
 	width = W;
 
 	tiles.resize(static_cast<size_t>(height) * width);
-	tile_choices.resize(static_cast<size_t>(height) * width);
 
-	// account for rotation
-	for (size_t i = 0; i != static_cast<size_t>(height) * width; i++)
-	{
-		tile_choices[i].resize(static_cast<int>(total_tiles) * 4);
-	}
-
-
-	for (int k = 0; k != height; k++) {
-		for (int j = 0; j != width; j++)
-		{
-			for (unsigned short i = 0; i != total_tiles; i++) {
-				for (char h = 0; h != 4; h++)
-				{
-					tile_choices[static_cast<size_t>(k) * width + j][static_cast<int>(i) * 4 + h] = Choice{ i, h, 0 };
-				}
-			}
-		}
-	}
+	
 }
 
 
@@ -73,6 +55,27 @@ void Terrain::generate() {
 	std::vector<Choice>* chs;
 	Choice ch;
 
+	tile_choices.resize(static_cast<size_t>(height) * width);
+
+	// account for rotation
+	for (size_t i = 0; i != static_cast<size_t>(height) * width; i++)
+	{
+		tile_choices[i].resize(static_cast<int>(total_tiles) * 4);
+	}
+
+
+	for (int k = 0; k != height; k++) {
+		for (int j = 0; j != width; j++)
+		{
+			for (unsigned short i = 0; i != total_tiles; i++) {
+				for (char h = 0; h != 4; h++)
+				{
+					tile_choices[static_cast<size_t>(k) * width + j][static_cast<int>(i) * 4 + h] = Choice{ i, h };
+				}
+			}
+		}
+	}
+
 
 	while (true)
 	{
@@ -92,6 +95,8 @@ void Terrain::generate() {
 
 
 	// clean up
+	this->tile_choices.clear();
+
 	/*for (int k = 0; k != height; k++) {
 		for (int j = 0; j != width; j++)
 		{

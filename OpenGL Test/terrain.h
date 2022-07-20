@@ -6,6 +6,14 @@
 
 
 class Terrain {
+public:
+	Terrain(int H, int W);
+	Tile* getTile(int x, int y);
+	void generate();
+	void collapse(int x, int y);
+
+	unsigned height, width;
+
 private:
 	static const unsigned short total_tiles = 6;
 	const char rotation_pos[4][2] = {
@@ -32,17 +40,8 @@ private:
 
 	};
 	std::vector<Tile> tiles;
-	std::vector< std::vector<Choice>> tile_choices;
+	std::vector<std::vector<Choice>> tile_choices;
 
 	std::vector<Choice>* getChoices(int x, int y);
 	void find_easiest_choice(int &x, int &y, unsigned& size);
-	
-
-public:
-	Terrain(int H, int W);
-	Tile* getTile(int x, int y);
-	void generate();
-	void collapse(int x, int y);
-
-	int height, width;
 };

@@ -6,11 +6,13 @@
 class Game
 {
 public:
+	~Game();
 	void init();
 	void update();
 	void render();
 	void end();
 
-	float scale = 0.0f;
+	float scale = 128.0f;
+
 private:
 };

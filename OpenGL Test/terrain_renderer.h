@@ -15,12 +15,12 @@ public:
 	TerrainRenderer(Shader &shader, Terrain &terrain);
 	//~TerrainRenderer();
 
-	void drawTerrain(Texture& atlas, glm::vec2 pos, float scale = 1.0f, float rotation = 0.0f);	
+	void drawTerrain(Texture& atlas, float x, float y, float scale = 1.0f, float rotation = 0.0f);	
 
+	Terrain *terrain;
 private:
 	Shader shader;
-	Terrain *terrain;
-	float *vertices;
+	std::vector<float> vertices;
 	unsigned int quadVAO;
 
 	void initRenderData();
