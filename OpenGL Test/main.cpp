@@ -27,7 +27,7 @@ int WINDOW_WIDTH = 600, WINDOW_HEIGHT = 600;
 
 int main()
 {
-    srand(0);
+    srand(1);
 
 
     /*const unsigned char vr_rots[4][3][2] = {
