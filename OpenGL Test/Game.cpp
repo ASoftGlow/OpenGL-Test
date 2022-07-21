@@ -41,7 +41,7 @@ void Game::init()
 void Game::render()
 {	
 	// terrain
-	Renderer->drawTerrain(*Resources::getTexture("atlas"), 100.0f, 100.0f, this->scale, 0.0f);
+	Renderer->drawTerrain(*Resources::getTexture("atlas"), 0.0f, 0.0f, this->scale, 0.0f);
 
 	// sprites
 	//Renderer->DrawSprite(t, glm::vec2(200.0f, 200.0f), 200.0f, 45.0f);
