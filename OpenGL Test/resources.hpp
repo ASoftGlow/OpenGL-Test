@@ -16,13 +16,12 @@ public:
 	static Shader loadShader(const char* vertexShaderPath, const char* fragmentShaderPath, std::string name);
 	static Shader* getShader(std::string name);
 
-	static Texture loadTexture(const char* filePath, bool alpha, std::string name);
+	static Texture loadTexture(const char* filePath, bool alpha, std::string name, bool flip = true);
 	static Texture* getTexture(std::string name);
-	static void flipTextures(bool flip);
 
 	static void clear();
 
 private:
-	static Texture loadTextureFromFile(const char* filePath, bool alpha);
+	static Texture loadTextureFromFile(const char* filePath, bool alpha, bool flip = true);
 	static std::string loadFromFile(const char* filePath);
 };

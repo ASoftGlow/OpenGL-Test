@@ -64,9 +64,9 @@ void TerrainRenderer::initRenderData()
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(x, y, 0.0f));
 
-			//model = glm::translate(model, glm::vec3(0.5f * scale, 0.5f * scale, 0.0f));
-			//model = glm::rotate(model, glm::radians(90.0f * tile->rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-			//model = glm::translate(model, glm::vec3(-0.5f * scale, -0.5f * scale, 0.0f));
+			model = glm::translate(model, glm::vec3(0.5f * scale, 0.5f * scale, 0.0f));
+			model = glm::rotate(model, glm::radians(90.0f * tile->rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::translate(model, glm::vec3(-0.5f * scale, -0.5f * scale, 0.0f));
 
 			model = glm::scale(model, glm::vec3(scale, scale, 1.0f));
 
@@ -98,7 +98,7 @@ void TerrainRenderer::initRenderData()
 	glGenBuffers(1, &VBO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size(), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(this->quadVAO);
 	glEnableVertexAttribArray(0);
@@ -128,7 +128,7 @@ void TerrainRenderer::drawTerrain(Texture& atlas, float x, float y, float scale,
 	unsigned long len = this->terrain->height * this->terrain->width * 3 * 2;
 
 	glBindVertexArray(this->quadVAO);
-	glDrawArrays(GL_TRIANGLES, 6*7, 6*1);
+	glDrawArrays(GL_TRIANGLES, 0, len);
 
 	glBindVertexArray(0);
 }
