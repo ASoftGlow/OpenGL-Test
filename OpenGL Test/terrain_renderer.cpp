@@ -49,8 +49,6 @@ void TerrainRenderer::initRenderData()
 		1.0f, 0.0f
 	};
 
-	//unsigned long len = this->terrain->height * this->terrain->width * 3 * 2 * 4;
-
 	const glm::mat4 projection = glm::ortho(0.0f, 800.0f,
 		800.0f, 0.0f, -1.0f, 1.0f);
 
