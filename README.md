@@ -1,4 +1,5 @@
 # OpenGL Test
+My C++ and OpenGL experiment
 
 ## Goals
 - Practice `C++`
