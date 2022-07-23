@@ -64,9 +64,8 @@ int main()
 		return -1;
 	}
 
-	srand(0);
+	srand(time(0));
 	game.init();
-
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -109,8 +108,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	game.scale += static_cast<float>(yoffset);
-	if (game.scale < 1) game.scale = 1;
-	//if (game.scale > 32) game.scale = 32;
+	if (game.scale < 1)  game.scale = 1;
+	if (game.scale > 32) game.scale = 32;
 }
 
 
