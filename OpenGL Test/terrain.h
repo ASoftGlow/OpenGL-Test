@@ -37,8 +37,8 @@ private:
 		   {0,0,0,0}, // land
 		   {1,1,1,1}, // sea
 		   {2,1,2,0}, // half land/sea
-		   {0,2,2,0}, // land corner
-		   {2,1,1,2}, // sea corner
+		   {0,2,2,0}, // land L corner
+		   {2,1,1,2}, // sea L corner
 		   {0,0,0,0}  // rock
 
 	};

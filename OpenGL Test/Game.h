@@ -15,7 +15,5 @@ public:
 	void end();
 
 	float scale = 16.0f;
-	Terrain* chunk;
-
-private:
+	Terrain* terrain;
 };
