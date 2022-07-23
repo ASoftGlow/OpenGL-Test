@@ -15,7 +15,6 @@ Terrain::Terrain(int H, int W)
 }
 
 
-
 Tile* Terrain::getTile(int x, int y) {
 	return &tiles.at(static_cast<size_t>(y) * width + x);
 }
@@ -48,6 +47,19 @@ void Terrain::find_easiest_choice(int& x, int& y, unsigned& size)
 
 
 void Terrain::generate() {
+	/*tiles = {
+		{2,2},{3,0},{4,0},{1,0},
+		{3,2},{2,0},{1,0},{1,0},
+		{0,0},{3,3},{4,3},{1,0},
+		{0,0},{0,0},{2,0},{1,0}
+	};
+	tiles = {
+		{2,2},{3,3},{4,3},{1,0},
+		{3,1},{2,0},{1,0},{1,0},
+		{0,0},{3,0},{4,0},{1,0},
+		{0,0},{0,0},{2,0},{1,0}
+	};
+	return;*/
 	int x, y;
 	unsigned easiest_size;
 	std::vector<Choice>* chs;
@@ -100,8 +112,15 @@ void Terrain::generate() {
 
 
 void Terrain::collapse(int x, int y) {
-	std::vector<Choice>* chs = getChoices(x, y);
 	Tile* t = getTile(x, y);
+	std::vector<Choice>* chs = getChoices(x, y);
+	std::vector<Choice>* chs2;
+	Choice chs_t, chs2_t;
+	int x_n, y_n;
+	unsigned short old_len, len;
+	bool q;
+	char rule, rule2;
+
 
 	if (chs->size() == 1)
 	{
@@ -109,13 +128,7 @@ void Terrain::collapse(int x, int y) {
 		t->rotation = chs->at(0).rotation;
 	}
 
-
-	int x_n, y_n;
-	std::vector<Choice>* chs2;
-	unsigned short old_len, len;
-	bool q;
-	char rule, rule2;
-
+	// iterator over surrounding tiles
 	for (char i = 0; i != 4; i++)
 	{
 		x_n = x + rotation_pos[i][0];
@@ -127,31 +140,26 @@ void Terrain::collapse(int x, int y) {
 
 		chs2 = getChoices(x_n, y_n);
 
-		/*for (int k = 0; k != height; k++) {
-			for (int j = 0; j != width; j++)
-			{
-				chs2
-			}
-		}*/
-
 		old_len = len = chs2->size();
 
+		// compare each Choice
 		for (unsigned short h = 0; h != len; h++)
 		{
-			q = 0;
-			Choice chs2_t = chs2->at(h);
+			q = false;
+			chs2_t = chs2->at(h);
 			rule2 = tileRules[chs2_t.type][mod(opposite_rotations[i] - chs2_t.rotation, 4)];
 			if (rule2 == 2) rule2 += (chs2_t.rotation < 2);
 
+
 			for (int j = 0; j != chs->size(); j++)
 			{
-				Choice chs_t = chs->at(j);
+				chs_t = chs->at(j);
 				rule = tileRules[chs_t.type][mod(i - chs_t.rotation, 4)];
 				if (rule == 2) rule += (chs_t.rotation < 2);
 
 				if (rule == rule2)
 				{
-					q = 1;
+					q = true;
 					break;
 				}
 			}
@@ -175,7 +183,5 @@ void Terrain::collapse(int x, int y) {
 		if (len != old_len) {
 			collapse(x_n, y_n);
 		}
-
 	}
-
 }

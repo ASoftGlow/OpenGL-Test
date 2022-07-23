@@ -1,7 +1,7 @@
 #include "terrain_renderer.h"
 
 
-TerrainRenderer::TerrainRenderer(Shader& shader, Terrain* terrain)
+TerrainRenderer::TerrainRenderer(Shader shader, Terrain* terrain)
 {
 	this->shader = shader;
 	this->terrain = terrain;
@@ -50,8 +50,8 @@ void TerrainRenderer::generateVertices()
 	glm::vec4 pos;
 	glm::mat4 model;
 
-	const glm::mat4 projection = glm::ortho(0.0f, 800.0f,
-		800.0f, 0.0f, -1.0f, 1.0f);
+	const glm::mat4 projection = glm::ortho(-1.0f, 1.0f,
+		-1.0f, 1.0f, -1.0f, 1.0f);
 
 
 	// gen vertices
@@ -59,11 +59,11 @@ void TerrainRenderer::generateVertices()
 		for (unsigned int x = 0; x != this->terrain->width; x++)
 		{
 			tile = this->terrain->getTile(x, y);
-
+			
 			// transformations
 			model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(x, y, 0.0f));
-
+			model = glm::translate(model, glm::vec3(x, this->terrain->height - y, 0.0f));
+			
 			model = glm::translate(model, glm::vec3(0.5f, 0.5f, 0.0f));
 			model = glm::rotate(model, glm::radians(90.0f * tile->rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 			model = glm::translate(model, glm::vec3(-0.5f, -0.5f, 0.0f));
@@ -77,7 +77,7 @@ void TerrainRenderer::generateVertices()
 				pos_x = quad_pos[j + 0];
 				pos_y = quad_pos[j + 1];
 
-				pos = model * glm::vec4(pos_x, pos_y, 0.0f, 1.0f);
+				pos = projection * model * glm::vec4(pos_x, pos_y, 0.0f, 1.0f);
 
 				// pos
 				this->vertices[ind + j * 2 + 0] = pos.x;
@@ -96,7 +96,7 @@ void TerrainRenderer::generateVertices()
 void TerrainRenderer::drawTerrain(Texture& atlas, float x, float y, float scale, float rotation)
 {
 	x -= scale * terrain->width / 2;
-	y -= scale * terrain->height / 2;
+	y -= scale * terrain->height * 3 / 4;
 
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(x, y, 0.0f));

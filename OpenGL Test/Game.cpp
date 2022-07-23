@@ -15,24 +15,24 @@ Game::~Game()
 void Game::init()
 {
 	// load shaders
-	Resources::loadShader("terrain.vert", "terrain.frag", "sprite");
+	Resources::loadShader("terrain.vert", "terrain.frag", "terrain");
 
 	// configure shaders
 	glm::mat4 projection = glm::ortho(0.0f, 800.0f,
 		800.0f, 0.0f, -1.0f, 1.0f);
-	Resources::getShader("sprite")->use();
-	Resources::getShader("sprite")->setInt("image", 0);
-	Resources::getShader("sprite")->setMatrix4("projection", projection);
+	Resources::getShader("terrain")->use();
+	Resources::getShader("terrain")->setInt("image", 0);
+	Resources::getShader("terrain")->setMatrix4("projection", projection);
 	
 	// load textures
-	Resources::loadTexture("assets/atlas.png", true, "atlas", true);
+	Resources::loadTexture("assets/atlas.png", true, "terrain_atlas", false);
 
 	// gen terrain
-	chunk = new Terrain{ 5,5 };
-	chunk->generate();
+	terrain = new Terrain{ 4,4 };
+	terrain->generate();
 
 	// create renderers
-	Renderer = new TerrainRenderer(*Resources::getShader("sprite"), chunk);
+	Renderer = new TerrainRenderer(*Resources::getShader("terrain"), terrain);
 }
 
 
@@ -40,7 +40,7 @@ void Game::render()
 {	
 	// terrain
 	Renderer->drawTerrain(
-		*Resources::getTexture("atlas"),
+		*Resources::getTexture("terrain_atlas"),
 		400.0f,
 		400.0f,
 		this->scale * 8,
@@ -53,6 +53,6 @@ void Game::render()
 
 void Game::update()
 {
-	chunk->generate();
+	terrain->generate();
 	Renderer->updateVBO();
 }
