@@ -4,25 +4,20 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-using namespace std;
 
-//#define STB_IMAGE_IMPLEMENTATION
-//#include "stb_image.h"
-
-//#include "resources.hpp"
-//#include "tile.h"
 #include "Game.h"
+#include "resources.hpp"
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
+
 Game game;
 
-const unsigned int WIDTH = 16, HEIGHT = 16;
-
 int WINDOW_WIDTH = 600, WINDOW_HEIGHT = 600;
+bool press = false;
 
 
 int main()
@@ -48,6 +43,18 @@ int main()
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSwapInterval(1); // vsync
 
+	// icon
+	GLFWimage images[3] = { 
+		Resources::textureFromFile("assets/icons/64.png", false),
+		Resources::textureFromFile("assets/icons/32.png", false),
+		Resources::textureFromFile("assets/icons/16.png", false)
+	};
+
+	glfwSetWindowIcon(window, 3, images);
+
+	for (char i = 0; i != 3; i++)  Resources::freeImageData(images[i].pixels);
+	
+
 	//glfwSetWindowOpacity(window, 0.5f);
 
 
@@ -57,9 +64,7 @@ int main()
 		return -1;
 	}
 
-
-
-	srand(1);
+	srand(0);
 	game.init();
 
 
@@ -69,13 +74,12 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
-		glfwGetFramebufferSize(window, &WINDOW_WIDTH, &WINDOW_HEIGHT);
+		//glfwGetFramebufferSize(window, &WINDOW_WIDTH, &WINDOW_HEIGHT);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 
 		game.render();
-
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -86,20 +90,26 @@ int main()
 	return 0;
 }
 
-//timeValue = glfwGetTime();
+
 
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	game.render();
+
+	glfwSwapBuffers(window);
 }
 
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	game.scale += static_cast<float>(yoffset) * 4;
-	//if (game.scale < 0) game.scale = 0;
+	game.scale += static_cast<float>(yoffset);
+	if (game.scale < 1) game.scale = 1;
 	//if (game.scale > 32) game.scale = 32;
 }
 
@@ -111,5 +121,14 @@ void processInput(GLFWwindow* window)
 	}
 	else if (glfwGetKey(window, GLFW_KEY_2)) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_3)) {
+		if (press) return;
+		press = true;
+
+		game.update();
+	}
+	else {
+		press = false;
 	}
 }

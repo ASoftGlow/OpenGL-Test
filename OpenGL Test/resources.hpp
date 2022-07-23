@@ -2,6 +2,8 @@
 
 #include <string>
 #include <map>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #include "shader_c.h"
 #include "texture_c.h"
@@ -18,6 +20,8 @@ public:
 
 	static Texture loadTexture(const char* filePath, bool alpha, std::string name, bool flip = true);
 	static Texture* getTexture(std::string name);
+	static GLFWimage textureFromFile(const char* file_path, bool flip = true);
+	static void freeImageData(unsigned char* data);
 
 	static void clear();
 

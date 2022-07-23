@@ -12,8 +12,6 @@ Terrain::Terrain(int H, int W)
 	width = W;
 
 	tiles.resize(static_cast<size_t>(height) * width);
-
-	
 }
 
 
@@ -97,14 +95,7 @@ void Terrain::generate() {
 	// clean up
 	this->tile_choices.clear();
 
-	/*for (int k = 0; k != height; k++) {
-		for (int j = 0; j != width; j++)
-		{
-			tile_choices.
-		}
-	}*/
-
-	std::cout << "Done!" << std::endl;
+	//std::cout << "Done!" << std::endl;
 }
 
 

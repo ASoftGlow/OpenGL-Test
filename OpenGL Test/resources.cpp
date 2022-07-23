@@ -81,6 +81,29 @@ Texture Resources::loadTextureFromFile(const char* filePath, bool alpha, bool fl
 }
 
 
+void Resources::freeImageData(unsigned char* data)
+{
+	stbi_image_free(data);
+}
+
+
+GLFWimage Resources::textureFromFile(const char* file_path, bool flip)
+{
+	stbi_set_flip_vertically_on_load(flip);
+
+	GLFWimage image;
+
+	image.pixels = stbi_load(file_path, &image.width, &image.height, 0, 4);
+
+	if (!image.pixels)
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	return image;
+}
+
+
 Texture Resources::loadTexture(const char* filePath, bool alpha, std::string name, bool flip)
 {
 	Texture t = loadTextureFromFile(filePath, alpha, flip);
