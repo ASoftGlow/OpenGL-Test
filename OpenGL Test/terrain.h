@@ -13,17 +13,20 @@ public:
 	void collapse(int x, int y);
 
 	unsigned height, width;
+	static const unsigned short total_tiles = 6;
 
 private:
-	static const unsigned short total_tiles = 6;
-	const char rotation_pos[4][2] = {
-		 0,  1,
-		 1,  0,
-		 0, -1,
-		-1,  0
+	std::vector<Choice>* getChoices(int x, int y);
+	void find_easiest_choice(int &x, int &y, unsigned& size);
+
+	static constexpr char rotation_pos[4][2] = {
+		{0,  1},
+		{1,  0},
+		{0, -1},
+		{-1, 0}
 	};
-	const char opposite_rotations[4] = { 2,3,0,1 };
-	const char tileRules[6][4] = {
+	static constexpr char opposite_rotations[4] = { 2,3,0,1 };
+	static constexpr char tileRules[6][4] = {
 		/*
 		  0: full land
 		  1: full sea
@@ -41,7 +44,4 @@ private:
 	};
 	std::vector<Tile> tiles;
 	std::vector<std::vector<Choice>> tile_choices;
-
-	std::vector<Choice>* getChoices(int x, int y);
-	void find_easiest_choice(int &x, int &y, unsigned& size);
 };

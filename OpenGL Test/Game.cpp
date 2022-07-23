@@ -1,11 +1,9 @@
 #include "Game.h"
 #include "resources.hpp"
 #include "sprite_renderer.h"
-#include "terrain_renderer.h"
 
 
 TerrainRenderer* Renderer;
-std::map<unsigned, Terrain*> chunks;
 
 
 Game::~Game()
@@ -27,22 +25,34 @@ void Game::init()
 	Resources::getShader("sprite")->setMatrix4("projection", projection);
 	
 	// load textures
-	Resources::loadTexture("assets/atlas.png", true, "atlas");
+	Resources::loadTexture("assets/atlas.png", true, "atlas", true);
 
 	// gen terrain
-	chunks[0] = new Terrain{ 5,5 };
-	chunks[0]->generate();
+	chunk = new Terrain{ 5,5 };
+	chunk->generate();
 
 	// create renderers
-	Renderer = new TerrainRenderer(*Resources::getShader("sprite"), *chunks[0]);
+	Renderer = new TerrainRenderer(*Resources::getShader("sprite"), chunk);
 }
 
 
 void Game::render()
 {	
 	// terrain
-	Renderer->drawTerrain(*Resources::getTexture("atlas"), 0.0f, 0.0f, this->scale, 0.0f);
+	Renderer->drawTerrain(
+		*Resources::getTexture("atlas"),
+		400.0f,
+		400.0f,
+		this->scale * 8,
+		0.0f);
 
 	// sprites
 	//Renderer->DrawSprite(t, glm::vec2(200.0f, 200.0f), 200.0f, 45.0f);
+}
+
+
+void Game::update()
+{
+	chunk->generate();
+	Renderer->updateVBO();
 }

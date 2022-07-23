@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include "terrain_renderer.h"
+
 
 class Game
 {
@@ -12,7 +14,8 @@ public:
 	void render();
 	void end();
 
-	float scale = 128.0f;
+	float scale = 16.0f;
+	Terrain* chunk;
 
 private:
 };
