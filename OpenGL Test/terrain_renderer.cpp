@@ -95,8 +95,9 @@ void TerrainRenderer::generateVertices()
 
 void TerrainRenderer::drawTerrain(Texture& atlas, float x, float y, float scale, float rotation)
 {
-	x -= scale * terrain->width / 2;
-	y -= scale * terrain->height * 3 / 4;
+	x -= scale * this->terrain->width / 2;
+	y -= scale * this->terrain->height / 2;
+	y -= scale;
 
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(x, y, 0.0f));
