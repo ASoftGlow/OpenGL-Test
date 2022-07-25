@@ -28,7 +28,7 @@ void Game::init()
 	Resources::loadTexture("assets/atlas.png", true, "terrain_atlas", false);
 
 	// gen terrain
-	terrain = new Terrain{ 4,4 };
+	terrain = new Terrain{ 10,10 };
 	terrain->generate();
 
 	// create renderers
