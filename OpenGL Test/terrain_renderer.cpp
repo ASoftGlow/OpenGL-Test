@@ -93,7 +93,7 @@ void TerrainRenderer::generateVertices()
 }
 
 
-void TerrainRenderer::drawTerrain(Texture& atlas, float x, float y, float scale, float rotation)
+void TerrainRenderer::drawTerrain(ArrayTexture& atlas, float x, float y, float scale, float rotation)
 {
 	x -= scale * this->terrain->width / 2;
 	y -= scale * this->terrain->height / 2;

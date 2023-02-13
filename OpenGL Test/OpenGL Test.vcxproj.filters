@@ -57,6 +57,9 @@
     <ClCompile Include="sprite_renderer.cpp">
       <Filter>Rendering\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ArrayTexture.cpp">
+      <Filter>Rendering\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -88,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="utils.h">
       <Filter>Terrain Generation\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrayTexture.h">
+      <Filter>Rendering\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

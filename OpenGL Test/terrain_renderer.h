@@ -6,6 +6,7 @@
 
 #include "shader_c.h"
 #include "texture_c.h"
+#include "ArrayTexture.h"
 #include "terrain.h"
 
 
@@ -14,7 +15,7 @@ class TerrainRenderer
 public:
 	TerrainRenderer(Shader shader, Terrain* terrain);
 
-	void drawTerrain(Texture& atlas, float x, float y, float scale = 1.0f, float rotation = 0.0f);	
+	void drawTerrain(ArrayTexture& atlas, float x, float y, float scale = 1.0f, float rotation = 0.0f);	
 	void updateVBO();
 
 	Terrain *terrain;

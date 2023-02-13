@@ -4,6 +4,8 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <filesystem>
+#include <vector>
 
 #include "Game.h"
 #include "resources.hpp"
@@ -25,8 +27,8 @@ int main()
 	// setup window
 
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, 1);
 	//glfwWindowHint(GLFW_DECORATED, 0);
@@ -44,7 +46,7 @@ int main()
 	glfwSwapInterval(1); // vsync
 
 	// icon
-	GLFWimage images[3] = { 
+	GLFWimage images[3] = {
 		Resources::textureFromFile("assets/icons/64.png", false),
 		Resources::textureFromFile("assets/icons/32.png", false),
 		Resources::textureFromFile("assets/icons/16.png", false)
@@ -53,7 +55,6 @@ int main()
 	glfwSetWindowIcon(window, 3, images);
 
 	for (char i = 0; i != 3; i++)  Resources::freeImageData(images[i].pixels);
-	
 
 	//glfwSetWindowOpacity(window, 0.5f);
 
@@ -73,10 +74,9 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
-		//glfwGetFramebufferSize(window, &WINDOW_WIDTH, &WINDOW_HEIGHT);
+		glfwGetFramebufferSize(window, &WINDOW_WIDTH, &WINDOW_HEIGHT);
 
 		glClear(GL_COLOR_BUFFER_BIT);
-		
 
 		game.render();
 

@@ -23,9 +23,10 @@ void Game::init()
 	Resources::getShader("terrain")->use();
 	Resources::getShader("terrain")->setInt("image", 0);
 	Resources::getShader("terrain")->setMatrix4("projection", projection);
-	
+
 	// load textures
 	Resources::loadTexture("assets/atlas.png", true, "terrain_atlas", false);
+	Resources::loadArrayTexture("assets/tiles", "terrain");
 
 	// gen terrain
 	terrain = new Terrain{ 10,10 };
@@ -37,10 +38,10 @@ void Game::init()
 
 
 void Game::render()
-{	
+{
 	// terrain
 	Renderer->drawTerrain(
-		*Resources::getTexture("terrain_atlas"),
+		*Resources::getArrayTexture("terrain"),
 		400.0f,
 		400.0f,
 		this->scale * 8,
