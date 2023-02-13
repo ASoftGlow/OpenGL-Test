@@ -25,7 +25,6 @@ void Game::init()
 	Resources::getShader("terrain")->setMatrix4("projection", projection);
 
 	// load textures
-	Resources::loadTexture("assets/atlas.png", true, "terrain_atlas", false);
 	Resources::loadArrayTexture("assets/tiles", "terrain");
 
 	// gen terrain

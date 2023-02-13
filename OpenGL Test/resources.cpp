@@ -124,7 +124,7 @@ Texture* Resources::getTexture(std::string name)
 ArrayTexture Resources::loadArrayTexture(const char* dirPath, std::string name, bool flip)
 {
 	ArrayTexture t;
-	int width, height, cha;
+	int width = 0, height = 0, cha;
 	std::vector<unsigned char> images;
 	char tileCount = 0;
 
@@ -139,37 +139,16 @@ ArrayTexture Resources::loadArrayTexture(const char* dirPath, std::string name, 
 		if (!(entry.path().extension().string() == ".png")) continue;
 		
 		unsigned char* data = stbi_load(entry.path().string().data(), &width, &height, &cha, 0);
-		std::cout << entry.path().string().data() << std::endl;
-		std::cout << data << std::endl;
+		if (!data) std::cerr << "Failed to load texture" << std::endl;
+
 		const int size = width * height * 4;
 		images.insert(images.end(), data, data + size);
-		free(data);
 		tileCount += 1;
+		free(data);
 	}
 	
-	std::cout << "total: \n" << images.data() << std::endl;
-	std::cout << "count: " << (int)tileCount << std::endl;
-	std::cout << "width: " << width << " height: " << height << std::endl;
 	t.generate(width, height, tileCount, images.data());
 
-	/*for (char* img_path : images_list)
-	{
-		std::cout << img_path << std::endl;
-
-		unsigned char* new_data = stbi_load(img_path, &width, &height, 0, 0);
-		const size_t new_size = sizeof(new_data) / sizeof(char);
-		const size_t old_size = sizeof(data_ptr) / sizeof(char);
-		data_ptr = new unsigned char[old_size + new_size];
-		std::copy(new_data, new_data + new_size, old_size);
-		free(new_data);
-		std::cout << data_ptr << std::endl;
-
-		if (!data_ptr) std::cout << "Failed to load texture" << std::endl;
-	}*/
-
-
-	//for (unsigned char* i : images)
-	//	free(i);
 
 	arrayTextures[name] = t;
 	return t;
