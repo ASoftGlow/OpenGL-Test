@@ -1,9 +1,9 @@
-#include "Chunk.h"
-#include "SaveManager.h"
+#include "chunk.h"
+#include "save_manager.h"
 
-Chunk::Chunk(int x, int y, unsigned short* size) : x(x), y(y), size(size)
+Chunk::Chunk(int x, int y, unsigned short size) : x(x), y(y)
 {
-	tiles.resize((size_t)*size * *size);
+	tiles.resize((size_t)size * size);
 }
 
 Tile* Chunk::getTile(unsigned short x, unsigned short y) {

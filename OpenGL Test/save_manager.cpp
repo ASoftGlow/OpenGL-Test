@@ -2,24 +2,52 @@
 #include <string>
 #include <iostream>
 #include <limits>
+#include <random>
+#include "libzippp/libzippp.h"
 
-#include "SaveManager.h"
+#include "save_manager.h"
 
 using namespace std::filesystem;
+using namespace libzippp;
 
 const int CHUNKS_START_OFFSET = sizeof(char) + sizeof(char) * SAVE_NAME_SIZE + sizeof(time_t) * 2 + sizeof(short);
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_int_distribution<int> dis(0, INT_MAX);
 
+int SaveManager::newId()
+{
+	return dis(gen);
+}
 
 size_t SaveManager::getChunkBlockSize()
 {
 	return (size_t)current.chunk_size * current.chunk_size * TILE_SIZE;;
 }
 
+file_time_type SaveManager::getSavesDirWriteTime()
+{
+	if (!std::filesystem::exists(saves_dir))
+		return file_time_type(std::chrono::system_clock::duration(0));
+	return last_write_time(saves_dir);
+}
+
+bool SaveManager::hasSavesDirChanged()
+{
+	const auto new_write_time = getSavesDirWriteTime();
+	if ((new_write_time - write_time).count() != 0)
+	{
+		write_time = new_write_time;
+		return true;
+	}
+	return false;
+}
+
 bool SaveManager::load(int id)
 {
 	if (id < 0) return false;
 
-	const path filePath = saveRoot(id) / saveDataFile;
+	const path filePath = getSaveDir(id) / GAME_DATA_FILE;
 
 	std::ifstream file;
 	file.open(filePath, std::ios::in | std::ios::binary/* | std::ios::ate*/);
@@ -79,12 +107,12 @@ bool SaveManager::loadChunk(int x, int y)
 {
 	printf("[DEBUG] Loading chunk (%i,%i)\n", x, y);
 
-	const path filePath = saveRoot(current.id) / saveDataFile;
+	const path filePath = getSaveDir(current.id) / GAME_DATA_FILE;
 
 	std::ifstream file;
 	file.open(filePath, std::ios::in | std::ios::binary);
 	if (!file.is_open()) {
-		std::cerr << "Load - " "Failed to open file (" << filePath << ")" << std::endl;
+		//std::cerr << "Load - " "Failed to open file (" << filePath << ")" << std::endl;
 		return false;
 	}
 
@@ -104,7 +132,7 @@ bool SaveManager::loadChunk(int x, int y)
 		char* tileData = new char[chunk_block_size];
 
 		file.read((char*)tileData, chunk_block_size);
-		current.chunks[std::pair<int, int>(x, y)] = Chunk{ x,y,&current.chunk_size };
+		current.chunks[std::pair<int, int>(x, y)] = Chunk( x,y,current.chunk_size );
 		Chunk* chunk = &current.chunks.at(std::pair<int, int>(x, y));
 
 		for (size_t i = 0; i < chunk_block_size; i += TILE_SIZE)
@@ -142,8 +170,8 @@ void SaveManager::newSave(const char* name)
 int SaveManager::duplicateSave(int sourceId)
 {
 	const int destId = newId();
-	const path sourceDir{ saveRoot(sourceId) };
-	const path destDir{ saveRoot(destId) };
+	const path sourceDir{ getSaveDir(sourceId) };
+	const path destDir{ getSaveDir(destId) };
 
 	copy(sourceDir, destDir, std::filesystem::copy_options::recursive);
 
@@ -152,7 +180,7 @@ int SaveManager::duplicateSave(int sourceId)
 
 void SaveManager::renameSave(int id, char version, const char* name)
 {
-	const path filePath = saveRoot(id) / saveDataFile;
+	const path filePath = getSaveDir(id) / GAME_DATA_FILE;
 
 	// Write game 
 	std::fstream file;
@@ -183,13 +211,15 @@ void SaveManager::renameSave(int id, char version, const char* name)
 
 bool SaveManager::deleteSave(int id)
 {
+	if (!exists(saves_dir)) return false;
 	if (id < 0) return false;
-	const path rootDir{ saveRoot(id) };
+	const path rootDir{ getSaveDir(id) };
 	return remove_all(rootDir) > 0;
 }
 
 bool SaveManager::deleteAllSaves()
 {
+	if (!exists(saves_dir)) return 0;
 	uintmax_t removedCount = remove_all(saves_dir) > 0;
 	create_directory(saves_dir);
 	return removedCount > 0;
@@ -199,54 +229,44 @@ std::vector<SavePreview> SaveManager::getSavesList()
 {
 	std::vector<SavePreview> saves = std::vector<SavePreview>();
 
-	for (const directory_entry& entry : directory_iterator(saves_dir, directory_options::skip_permission_denied))
-	{
-		std::ifstream file;
-		file.open(entry.path() / saveDataFile, std::ios::in | std::ios::binary);
-		if (!file.is_open())
-			continue;
-
-		SavePreview save;
-
-		// process data
-		file.read(&save.version, sizeof(char));
-
-		switch (save.version)
+	if (exists(saves_dir))
+		for (const directory_entry& entry : directory_iterator(saves_dir, directory_options::skip_permission_denied))
 		{
-		case 1:
-			// id
-			save.id = std::stoi(entry.path().filename().string());
-			if (save.id < 0) continue;
-			// name
-			file.read(save.name, sizeof(save.name));
-			// created time
-			time_t created_time;
-			file.read((char*)&created_time, sizeof(created_time));
-			save.created_time = std::chrono::system_clock::from_time_t(created_time);
-			// saved time
-			time_t saved_time;
-			file.read((char*)&saved_time, sizeof(saved_time));
-			save.last_save_time = std::chrono::system_clock::from_time_t(saved_time);
-			break;
+			std::ifstream file;
+			file.open(entry.path() / GAME_DATA_FILE, std::ios::in | std::ios::binary);
+			if (!file.is_open())
+				continue;
 
-		default:
-			continue;
+			SavePreview save;
+
+			// process data
+			file.read(&save.version, sizeof(char));
+
+			switch (save.version)
+			{
+			case 1:
+				// id
+				save.id = std::stoi(entry.path().filename().string());
+				if (save.id < 0) continue;
+				// name
+				file.read(save.name, sizeof(save.name));
+				// created time
+				time_t created_time;
+				file.read((char*)&created_time, sizeof(created_time));
+				save.created_time = std::chrono::system_clock::from_time_t(created_time);
+				// saved time
+				time_t saved_time;
+				file.read((char*)&saved_time, sizeof(saved_time));
+				save.last_save_time = std::chrono::system_clock::from_time_t(saved_time);
+				break;
+
+			default:
+				continue;
+			}
+
+			saves.push_back(save);
 		}
-
-		saves.push_back(save);
-	}
 	return saves;
-}
-
-bool SaveManager::hasSavesDirChanged()
-{
-	const auto new_write_time = last_write_time(saves_dir);
-	if ((new_write_time - write_time).count() != 0)
-	{
-		write_time = new_write_time;
-		return true;
-	}
-	return false;
 }
 
 
@@ -261,9 +281,11 @@ bool SaveManager::save(int id)
 
 	current.last_save_time = std::chrono::system_clock::now();
 
-	const path rootDir{ saveRoot(id) };
-	const path filePath = rootDir / saveDataFile;
+	const path rootDir{ getSaveDir(id) };
+	const path filePath = rootDir / GAME_DATA_FILE;
 
+	if (!exists(saves_dir))
+		create_directory(saves_dir);
 	if (!exists(rootDir))
 		create_directory(rootDir);
 
@@ -317,6 +339,37 @@ bool SaveManager::save(int id)
 	file.close();
 
 
+	return true;
+}
+
+bool SaveManager::exportSave(const char* path)
+{
+	ZipArchive zf{ path };
+	zf.open(ZipArchive::New);
+
+	zf.addFile(GAME_DATA_FILE, (getSaveDir(current.id) / GAME_DATA_FILE).string());
+
+	zf.close();
+	return true;
+}
+
+bool SaveManager::importSave(const char* path)
+{
+	const int id = newId();
+
+	ZipArchive zf{ path };
+	zf.open(ZipArchive::ReadOnly);
+
+	std::vector<ZipEntry> entries = zf.getEntries();
+	std::vector<ZipEntry>::iterator it;
+	for (it = entries.begin(); it != entries.end(); ++it) {
+		ZipEntry entry = *it;
+		std::string name = entry.getName();
+
+		std::cout << name << std::endl;
+	}
+
+	zf.close();
 	return true;
 }
 

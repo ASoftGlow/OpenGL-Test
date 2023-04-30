@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "game.h"
 #include "resources.hpp"
 
 
@@ -15,7 +15,7 @@ Game::~Game()
 void Game::init()
 {
 	// load shaders
-	Shader* terrain_shader = Resources::loadShader("terrain.vert", "terrain.frag", "terrain");
+	Shader* terrain_shader = Resources::loadShader("assets/shaders/terrain.vert", "assets/shaders/terrain.frag", "terrain");
 
 	// configure shaders
 	glm::mat4 projection = glm::ortho(0.0f, (float)window_width,
@@ -29,6 +29,7 @@ void Game::init()
 	terrain_shader->setInt("terrain_atlas", 0);
 	Resources::loadTexture("assets/foliage_mask.png", true, "foliage_mask", false);
 	terrain_shader->setInt("foliage_mask", 1);
+	Resources::loadTexture("assets/icons.png", true, "icons", false);
 
 	// random_gen terrain
 	terrain = new Terrain{
@@ -52,22 +53,22 @@ void Game::init()
 Chunk* Game::getCurrentChunk()
 {
 	return terrain->getChunk(
-		-(int)floor(pan_x / (*terrain->width * 8) + 0.5),
-		(int)floor(pan_y / (*terrain->height * 8) + 0.5)
+		-(int)floor(pan_x / (*terrain->chunk_size * 8) + 0.5),
+		(int)floor(pan_y / (*terrain->chunk_size * 8) + 0.5)
 	);
 }
 
 
 void Game::loadVisableChunks()
 {
-	const int current_chunk_x = -(int)floor(pan_x / (*terrain->width * 8) + 0.5);
-	const int current_chunk_y = (int)floor(pan_y / (*terrain->height * 8) + 0.5);
+	const int current_chunk_x = -(int)floor(pan_x / (*terrain->chunk_size * 8) + 0.5);
+	const int current_chunk_y = (int)floor(pan_y / (*terrain->chunk_size * 8) + 0.5);
 
-	const float offset_from_chunk_x = (float)(pan_x / (*terrain->width * 8) + 0.5) + current_chunk_x;
-	const float offset_from_chunk_y = (float)(pan_y / (*terrain->height * 8) + 0.5) - current_chunk_y;
+	const float offset_from_chunk_x = (float)(pan_x / (*terrain->chunk_size * 8) + 0.5) + current_chunk_x;
+	const float offset_from_chunk_y = (float)(pan_y / (*terrain->chunk_size * 8) + 0.5) - current_chunk_y;
 
-	const int view_chunk_length = (int)ceil((float)window_width / 8 / *terrain->width / zoom);// + (offset_from_chunk_x >= (*terrain->width * 8));
-	const int view_chunk_height = (int)ceil((float)window_height / 8 / *terrain->height / zoom);// +();
+	const int view_chunk_length = (int)ceil((float)window_width / 8 / *terrain->chunk_size / zoom);// + (offset_from_chunk_x >= (*terrain->chunk_size * 8));
+	const int view_chunk_height = (int)ceil((float)window_height / 8 / *terrain->chunk_size / zoom);// +();
 
 	std::vector<std::pair<int, int>> chunksToGenerate;
 	//printf("\rzoom: %f chunk: (%f,%f) ", zoom, offset_from_chunk_x, offset_from_chunk_y);
@@ -89,11 +90,12 @@ void Game::loadVisableChunks()
 	}
 
 	// Create unexisting chunks
-	for (auto& [x, y] : chunksToGenerate)
+	/*for (auto& [x, y] : chunksToGenerate)
 	{
 		printf("Generating chunk (%i,%i)\n", x, y);
-		terrain->generate(x, y);
-	}
+		terrain->generateChunk(x, y);
+	}*/
+	terrain->generateChunks(chunksToGenerate);
 }
 
 
@@ -126,9 +128,9 @@ void Game::update()
 void Game::save()
 {
 	if (SaveManager::save())
-		logger.info("Saved");
+		Logger::info("Saved");
 	else
-		logger.error("Failed to save");
+		Logger::error("Failed to save");
 }
 
 void Game::save(int id)
@@ -144,11 +146,11 @@ void Game::load(int id)
 		terrain->init();
 		loadVisableChunks();
 		renderer->updateVBO();
-		logger.info("Loaded save id: ");
+		Logger::info("Loaded save id: ");
 		printf("%i", id);
 	}
 	else
-		logger.error("Failed to load");
+		Logger::error("Failed to load");
 }
 
 void Game::create()
@@ -156,11 +158,28 @@ void Game::create()
 	SaveManager::newSave("My World");
 	terrain->init();
 	// First chunks
-	/*terrain->generate(0, 0);
-	terrain->generate(1, 0);
-	terrain->generate(0, 1);
-	terrain->generate(1, 1);*/
+	//terrain->generateChunk(0, 0);
+	/*terrain->generateChunk(1, 0);
+	terrain->generateChunk(0, 1);
+	terrain->generateChunk(1, 1);*/
 	loadVisableChunks();
 
 	renderer->updateVBO();
 }
+
+void Game::quit()
+{
+	SaveManager::current = Save{};
+	renderer->updateVBO();
+}
+
+void Game::importSave(const char* path)
+{
+	SaveManager::importSave(path);
+}
+
+void Game::exportSave(const char* path)
+{
+	SaveManager::exportSave(path);
+}
+

@@ -1,15 +1,6 @@
-#include "Logger.h"
+#include "logger.h"
 
 #include <iostream>
-
-Logger::Logger() : timestamped(false)
-{
-
-}
-Logger::Logger(bool timestamped)
-{
-	this->timestamped = timestamped;
-}
 
 void Logger::info(const char* msg)
 {
@@ -18,7 +9,9 @@ void Logger::info(const char* msg)
 
 void Logger::debug(const char* msg)
 {
+#if _DEBUG
 	std::cout << "[DEBUG] " << msg << std::endl;
+#endif
 }
 
 void Logger::error(const char* msg)

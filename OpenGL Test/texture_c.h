@@ -1,6 +1,5 @@
 // learnopengl.com
 #pragma once
-
 #include <glad/glad.h>
 
 

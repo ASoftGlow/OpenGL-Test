@@ -31,7 +31,7 @@ void TerrainRenderer::initRenderData()
 
 void TerrainRenderer::updateVBO()
 {
-	const size_t len = this->terrain->chunks->size() * *this->terrain->height * *this->terrain->width * 2 * 3 * 4;
+	const size_t len = this->terrain->chunks->size() * *this->terrain->chunk_size * *this->terrain->chunk_size * 2 * 3 * 4;
 	this->vertices.resize(len);
 
 	generateVertices();
@@ -49,13 +49,13 @@ void TerrainRenderer::generateVertices()
 	for (auto& [pos, chunk] : *this->terrain->chunks)
 	{
 		// gen vertices
-		for (unsigned y = 0; y != *this->terrain->height; y++) {
-			for (unsigned x = 0; x != *this->terrain->width; x++)
+		for (unsigned y = 0; y != *this->terrain->chunk_size; y++) {
+			for (unsigned x = 0; x != *this->terrain->chunk_size; x++)
 			{
 				Tile* tile = chunk.getTile(x, y);
 
 				// 2 tri, 3 vert per
-				size_t ind = (x + y * *this->terrain->width) * 2 * 3 * 4 + (count * *this->terrain->height * *this->terrain->width * 2 * 3 * 4);
+				size_t ind = (x + y * *this->terrain->chunk_size) * 2 * 3 * 4 + (count * *this->terrain->chunk_size * *this->terrain->chunk_size * 2 * 3 * 4);
 
 				for (char j = 0; j < 12; j += 2)
 				{
@@ -81,7 +81,7 @@ void TerrainRenderer::generateVertices()
 
 void TerrainRenderer::drawTerrain(Texture& atlas, Texture& foliage, double x, double y, float scale, float rotation)
 {
-	const size_t len = (size_t)*this->terrain->height * *this->terrain->width * 3 * 2;
+	const size_t len = (size_t)*this->terrain->chunk_size * *this->terrain->chunk_size * 3 * 2;
 	size_t chunk_index = 0;
 
 	glActiveTexture(GL_TEXTURE0);
@@ -93,8 +93,8 @@ void TerrainRenderer::drawTerrain(Texture& atlas, Texture& foliage, double x, do
 
 	for (auto& [pos, chunk] : *this->terrain->chunks)
 	{
-		double newX = x - scale * ((float)*this->terrain->width / 2 - pos.first * *this->terrain->width);
-		double newY = y - scale * ((float)*this->terrain->height / 2 + pos.second * *this->terrain->height);
+		double newX = x - scale * ((float)*this->terrain->chunk_size / 2 - pos.first * *this->terrain->chunk_size);
+		double newY = y - scale * ((float)*this->terrain->chunk_size / 2 + pos.second * *this->terrain->chunk_size);
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(newX, newY, 0.0f));

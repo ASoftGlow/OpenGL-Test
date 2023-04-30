@@ -7,13 +7,14 @@
 #include <chrono>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_internal.h>
+#include <ImGui/imgui.h>
+#include <ImGui/imgui_impl_glfw.h>
+#include <ImGui/imgui_impl_opengl3.h>
+#include <ImGui/imgui_internal.h>
 
-#include "Game.h"
+#include "game.h"
 #include "resources.hpp"
+#include "file_dialog.h"
 
 #define MAX_SAVES_LIST_COUNT 7
 #define TITLE_PREFIX "Wave Function Collapse | OpenGL | "
@@ -33,15 +34,28 @@ void setTitle(GLFWwindow* window, const char* title);
 int inital_window_width = 600, inital_window_height = 600;
 double mouse_pos_old_x;
 double mouse_pos_old_y;
-double game_pos_old_x,
-game_pos_old_y;
+double game_pos_old_x, game_pos_old_y;
 bool panning = false;
+bool wire_mode = false;
+bool show_fps = false;
 
 Game game;
 
 
-int main()
+int main(int argc, char* argv[])
 {
+	//// Parse command line arguments
+	/*for (int i = 1; i < argc; i++)
+	{
+		printf("Arg %i: %s\n", i, argv[i]);
+		if (strcmp(argv[i], "--open") == 0) 
+		{
+			game.load();
+			i++;
+			continue;
+		}
+	}*/
+
 	// setup window
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -99,18 +113,14 @@ int main()
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsLight();
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
-
-	bool wire_mode = false;
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -127,16 +137,18 @@ int main()
 		ImGui::NewFrame();
 
 		ImGui::ShowDemoWindow();
-		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 
 		showMenuBar(window);
 
-		/*ImGui::Begin(SaveManager::current.name);
+		if (show_fps)
+			if (ImGui::Begin("FPS", 0,
+				ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoNav |
+				ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs))
+			{
+				ImGui::Text("%.1f FPS", io.Framerate);
 
-		ImGui::Checkbox("Wire mode", &wire_mode);
-		ImGui::Text("%.1f FPS", io.Framerate);
-
-		ImGui::End();*/
+				ImGui::End();
+			}
 
 		ImGui::Render();
 
@@ -162,7 +174,7 @@ int main()
 
 void showMenuBar(GLFWwindow* window)
 {
-	static const ImVec4 none_color{ 0.0f, 0.0f, 0.0f, 0.0f };
+	static const ImVec4 editing_color{ 0.7f, 0.7f, 0.7f, 0.2f };
 	static const float BASE_TEXT_WIDTH = ImGui::CalcTextSize("A").x;
 	static const auto tz = current_zone();
 
@@ -180,17 +192,19 @@ void showMenuBar(GLFWwindow* window)
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Save", "Ctrl+S"))
-			{
-				game.save();
-				if (!SaveManager::hasSavesDirChanged())
-					saves = SaveManager::getSavesList();
-			}
+			if (ImGui::MenuItem("New", "Ctrl+N"))
+				show_new_save_popup = true;
 			if (ImGui::BeginMenu("Load"))
 			{
 				static ImGuiTextFilter filter;
 
 				ImGui::SeparatorText("Saves");
+				if (saves.size() == 0)
+				{
+					ImGui::Text("No saves! Do you want to create a world?");
+					if (ImGui::Button("New World"))
+						show_new_save_popup = true;
+				}
 				ImGui::BeginTable("Saves", 3, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerH);
 				ImGui::TableSetupColumn("Name", 0, BASE_TEXT_WIDTH * 20);
 				ImGui::TableSetupColumn("Time");
@@ -227,7 +241,6 @@ void showMenuBar(GLFWwindow* window)
 						ImGui::SetKeyboardFocusHere();
 
 						ImGui::PushItemWidth(BASE_TEXT_WIDTH * SAVE_NAME_SIZE);
-						ImGui::PushStyleColor(ImGuiCol_FrameBg, none_color);
 						if (ImGui::InputText("##rename", name_buff, sizeof(name_buff),
 							ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_NoHorizontalScroll))
 						{
@@ -240,8 +253,9 @@ void showMenuBar(GLFWwindow* window)
 						}
 						/*if (!ImGui::IsItemFocused())
 							renaming = -1;*/
-						ImGui::PopStyleColor();
 						ImGui::PopItemWidth();
+						//ImGui::SameLine();
+						//ImGui::Image((void*)(intptr_t)Resources::getTexture("icons")->ID, ImVec2(16.0f, 16.0f));
 					}
 					else {
 						if (ImGui::Selectable(save.name, false, ImGuiSelectableFlags_SpanAllColumns))
@@ -302,10 +316,47 @@ void showMenuBar(GLFWwindow* window)
 				ImGui::EndTable();
 				ImGui::EndMenu();
 			}
+			if (ImGui::MenuItem("Import"))
+			{
+				//TODO
+				char path[256];
+				if (BasicFileOpen(path) >= 0)
+				{
+					game.importSave(path);
+				}
+			}
+			else if (ImGui::IsItemHovered())
+				ImGui::SetTooltip("Imports a Glow Save File (.glowsave)");
+			ImGui::Separator();
+			if (SaveManager::current.id == -1)
+				ImGui::BeginDisabled();
+			if (ImGui::MenuItem("Save", "Ctrl+S"))
+			{
+				game.save();
+				if (!SaveManager::hasSavesDirChanged())
+					saves = SaveManager::getSavesList();
+			}
+			if (ImGui::MenuItem("Export"))
+			{
+				//TODO
+				game.exportSave("C:\\Users\\hankv\\Documents\\test.zip");
+			}
+			else if (ImGui::IsItemHovered())
+				ImGui::SetTooltip("Exports save to a Glow Save File (.glowsave)");
+			if (ImGui::MenuItem("Quit"))
+			{
+				game.quit();
+				setTitle(window, "");
+			}
+			else if (SaveManager::current.id == -1)
+				ImGui::EndDisabled();
 
-			if (ImGui::MenuItem("New", "Ctrl+N"))
-				show_new_save_popup = true;
-
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("View"))
+		{
+			ImGui::MenuItem("Wire mode", 0, &wire_mode);
+			ImGui::MenuItem("FPS", 0, &show_fps);
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
@@ -326,22 +377,27 @@ void showMenuBar(GLFWwindow* window)
 	if (show_new_save_popup)
 	{
 		ImGui::OpenPopup("New World");
+		strcpy(name_buff, "My World");
 		show_new_save_popup = false;
 	}
 	if (ImGui::BeginPopupModal("New World"))
 	{
 		ImGui::InputText("Name", name_buff, SAVE_NAME_SIZE);
 		if (ImGui::Button("Close"))
+		{
+			name_buff[0] = '\0';
 			ImGui::CloseCurrentPopup();
+		}
 		ImGui::SameLine();
 		if (ImGui::Button("Create"))
 		{
 			if (name_buff[0] != '\0')
 			{
-				ImGui::CloseCurrentPopup();
 				game.create();
 				strcpy(SaveManager::current.name, name_buff);
 				setTitle(window, name_buff);
+				name_buff[0] = '\0';
+				ImGui::CloseCurrentPopup();
 			}
 		}
 		ImGui::EndPopup();

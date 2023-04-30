@@ -368,4 +368,4 @@ glad.c
 stb_image.h
 
 saves/
-/OpenGL Test/imgui.ini
+imgui.ini

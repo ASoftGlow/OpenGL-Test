@@ -1,49 +1,19 @@
 #include <iostream>
 #include <stdlib.h>
+#include <ctpl/ctpl_stl.h>
 
 #include "terrain.h"
 #include "terrain_renderer.h"
-#include "utils.h"
-#include "SaveManager.h"
+#include "save_manager.h"
+#include "chunk_generator.h"
 
-
-Terrain::Terrain(unsigned short* size_ptr, std::map<std::pair<int, int>, Chunk>* chunks_ptr)
-	: width(size_ptr), height(size_ptr), chunks(chunks_ptr)
+Terrain::Terrain(unsigned short* pSize, std::map<std::pair<int, int>, Chunk>* chunks_ptr)
+	: chunk_size(pSize), chunks(chunks_ptr)
 {
 	random_gen = std::mt19937(rd());
 }
 
-
-void Terrain::init()
-{
-	tile_choices.resize((size_t)*height * *width);
-}
-
-
-std::vector<Choice>* Terrain::getChoices(unsigned x, unsigned y) {
-	return &tile_choices.at(static_cast<size_t>(y) * *width + x);
-}
-
-
-void Terrain::findEasiestChoice(unsigned& x, unsigned& y, unsigned& size)
-{
-	size = TerrainRenderer::atlas_size * 4 + 1;
-
-	for (int k = 0; k != *height; k++) {
-		for (int j = 0; j != *width; j++)
-		{
-			unsigned short size2 = (unsigned short)getChoices(j, k)->size();
-			if (size2 < size && size2 > 1)
-			{
-				size = size2;
-				x = j;
-				y = k;
-			}
-		}
-	}
-
-	if (size == TerrainRenderer::atlas_size * 4 + 1) size = 1;
-}
+void Terrain::init() {}
 
 Chunk* Terrain::getChunk(int x, int y)
 {
@@ -56,174 +26,35 @@ Chunk* Terrain::getChunk(int x, int y)
 	return &chunks->at(chunk_pos);
 }
 
-void Terrain::generate(int chunk_x, int chunk_y) 
+void Terrain::generateChunk(int x, int y)
 {
-	for (size_t i = 0; i != (size_t)*height * *width; i++)
-	{
-		tile_choices[i].resize(TerrainRenderer::atlas_size);
-	}
-
-	for (int k = 0; k != *height; k++) {
-		for (int j = 0; j != *width; j++)
-		{
-			for (unsigned short i = 0; i != TerrainRenderer::atlas_size; i++) {
-				tile_choices[static_cast<size_t>(k) * *width + j][i] = Choice{ (TileType)i };
-			}
-		}
-	}
-
-	// Update Choices based on existing surrounding chunks
-	for (char j = 0; j < 4; j++)
-	{
-		const char* chunk_offset = rotation_pos[j];
-		std::pair<int, int> chunk_pos = std::pair<int, int>(chunk_x + chunk_offset[0], chunk_y + chunk_offset[1]);
-		if (!chunks->contains(chunk_pos))
-			// No neighbor
-			continue;
-		Chunk* refChunk = &chunks->at(chunk_pos);
-
-		const bool isWidth = chunk_offset[0] == 0;
-		int x2 = (chunk_offset[0] == 1) ? *width - 1 : 0;
-		int y2 = (chunk_offset[1] == -1) ? *height - 1 : 0;
-
-		for (unsigned short i = 0; i < (isWidth ? *height : *width); i++)
-		{
-			// Get reference tile (neighbor chunk)
-			Tile* tile = refChunk->getTile(
-				(isWidth ? (x2 + i) : (*width - 1 - x2)),
-				(isWidth ? (*height - 1 - y2) : (y2 + i))
-			);
-			// Get end tile choices (current gen)
-			std::vector<Choice>* choices = getChoices(
-				x2 + (isWidth ? i : 0),
-				y2 + (isWidth ? 0 : i)
-			);
-
-			char rule = tile_rules[tile->type][isWidth ? j : (j + 2) % 4];
-			unsigned short len = (unsigned short)choices->size();
-
-			// compare each Choice
-			for (unsigned short h = 0; h != len; h++)
-			{
-				Choice choice = choices->at(h);
-				// opposite side
-				char rule2 = tile_rules[choice.type][isWidth ? (j + 2) % 4 : j];
-
-				if (rule == rule2)
-					continue;
-
-				choices->erase(choices->begin() + h);
-				len--;
-				h--;
-			}
-		}
-	}
-
-	(*chunks)[std::pair<int, int>(chunk_x, chunk_y)] = Chunk{ chunk_x, chunk_y, width };
-	Chunk* chunk = getChunk(chunk_x, chunk_y);
-
-	int count = 0;
-	while (true)
-	{
-		count++;
-		unsigned x, y;
-		unsigned easiest_size;
-		findEasiestChoice(x, y, easiest_size);
-		if (easiest_size == 1) {
-			break;
-		}
-
-		// pick a choice and isolate it
-		std::vector<Choice>* chs = getChoices(x, y);
-		// get weights and setup random distribution
-		std::vector<short> weights;
-		weights.reserve(chs->size());
-		for (Choice c : *chs)
-		{
-			weights.push_back(tile_weights[c.type]);
-		}
-
-		std::discrete_distribution<> weighted_rand = std::discrete_distribution<>{ weights.begin(),weights.end() };
-
-		Choice ch = chs->at(weighted_rand(random_gen));
-
-		chs->clear();
-		chs->push_back(ch);
-
-		collapse(chunk, x, y);
-	}
-
-	// clean up
-	//this->tile_choices.clear();
+	ChunkGenerator cg(*chunk_size, &random_gen);
+	SaveManager::current.chunks[std::pair<int, int>(x, y)] = cg.generate(x, y);
 }
 
+void Terrain::generateChunks(std::vector<std::pair<int, int>> chunks)
+{
+	std::vector<std::pair<int, int>> pass1, pass2;
+	pass1.reserve(chunks.size() / 2);
+	pass2.reserve(chunks.size() / 2);
 
-void Terrain::collapse(Chunk* chunk, unsigned tile_x, unsigned tile_y) {
-	Tile* t = chunk->getTile(tile_x, tile_y);
-	std::vector<Choice>* chs = getChoices(tile_x, tile_y);
-
-	if (chs->size() == 1)
+	for (std::pair<int, int> c : chunks)
 	{
-		t->type = chs->at(0).type;
+		if (((long)c.first + (c.second % 2 == 0)) % 2 == 0)
+			pass1.push_back(c);
+		else
+			pass2.push_back(c);
 	}
 
-	// iterator over surrounding tiles
-	for (char i = 0; i != 4; i++)
-	{
-		int new_x = tile_x + rotation_pos[i][0];
-		int new_y = tile_y + rotation_pos[i][1];
+	ctpl::thread_pool p(std::thread::hardware_concurrency());
 
-		// check out of bounds
-		if (new_x < 0 || new_x >= *width ||
-			new_y < 0 || new_y >= *height)
-			continue;
+	// first pass
+	for (auto& [x, y] : pass1)
+		p.push([&, this](int id) { generateChunk(x, y); });
 
-		std::vector<Choice>* chs2 = getChoices(new_x, new_y);
+	// second pass
+	for (auto& [x, y] : pass2)
+		p.push([&, this](int id) { generateChunk(x, y); });
 
-
-		unsigned short old_len = (unsigned short)chs2->size();
-		unsigned short len = old_len;
-
-		// compare each Choice
-		for (unsigned short h = 0; h != len; h++)
-		{
-			bool isMatch = false;
-			const Choice chs2_t = chs2->at(h);
-			// opposite side
-			const char rule2 = tile_rules[chs2_t.type][(i + 2) % 4];
-
-			for (int j = 0; j != chs->size(); j++)
-			{
-				const Choice chs_t = chs->at(j);
-				const char rule = tile_rules[chs_t.type][i];
-
-				if (rule == rule2)
-				{
-					isMatch = true;
-					break;
-				}
-			}
-
-			if (isMatch) continue;
-
-
-			chs2->erase(chs2->begin() + h);
-
-			if (chs->size() == 1)
-			{
-				t->type = chs->at(0).type;
-			}
-			if (chs->size() == 0) {
-				std::cout << "MISSING ";
-				break;
-			}
-
-			h--;
-			len--;
-		}
-
-		if (len != old_len) {
-			collapse(chunk, new_x, new_y);
-		}
-	}
+	p.stop(true);
 }

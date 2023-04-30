@@ -2,10 +2,12 @@
 #include <vector>
 #include <filesystem>
 
-#include "Save.h"
+#include "save.h"
 
-#define saveRoot(id) saves_dir / std::to_string(id)
-#define saveDataFile "game.data"
+#define GAME_DATA_FILE "world"
+#define GAME_COMPANY "ASoftGlow Software"
+#define GAME_NAME "Game"
+#define GAME_DEV
 
 using namespace std::filesystem;
 
@@ -18,7 +20,6 @@ public:
 	*/
 	static bool save();
 	static bool save(int id);
-	static bool saveChunk(int x, int y);
 	/*
 	* Loads a save from disk
 	* @param id - The unique id of the save
@@ -43,18 +44,23 @@ public:
 	static bool deleteAllSaves();
 	static std::vector<SavePreview> getSavesList();
 	static path getSaveDir(int id) {
-		return path{ saveRoot(id) };
+		return saves_dir / std::to_string(id);
 	}
 	static bool hasSavesDirChanged();
+	static bool importSave(const char* path);
+	static bool exportSave(const char* path);
 
 	inline static Save current;
 
 private:
 	static size_t getChunkBlockSize();
-	static int newId() {
-		return rand();
-	}
+	static int newId();
+	static file_time_type getSavesDirWriteTime();
 
-	inline static const path saves_dir{ current_path().string() + "\\saves" };
-	inline static file_time_type write_time = last_write_time(saves_dir);
+#ifndef GAME_DEV
+	inline static const path saves_dir{ std::string{ getenv("APPDATA") } + "\\" GAME_COMPANY "\\" GAME_NAME "\\saves" };
+#else
+	inline static const path saves_dir{ current_path() / "saves" };
+#endif
+	inline static file_time_type write_time = getSavesDirWriteTime();
 };

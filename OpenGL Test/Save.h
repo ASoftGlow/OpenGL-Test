@@ -1,15 +1,10 @@
 #pragma once
-
 #include <vector>
 #include <map>
 #include <chrono>
-#include "Chunk.h"
+#include "chunk.h"
 
 #define SAVE_NAME_SIZE 21
-
-struct Settings {
-	float pan_x = 0, pan_y = 0;
-};
 
 struct Save {
 	char version = -1;
@@ -19,7 +14,6 @@ struct Save {
 	std::chrono::time_point<std::chrono::system_clock> last_save_time;
 	std::map<std::pair<int, int>, Chunk> chunks;
 	unsigned short chunk_size = 0;
-	Settings settings;
 };
 
 struct SavePreview {

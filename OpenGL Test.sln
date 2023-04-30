@@ -5,6 +5,8 @@ VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGL Test", "OpenGL Test\OpenGL Test.vcxproj", "{82317102-9789-4433-B9D1-8BEB670C7AF1}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "Installer\Installer.vdproj", "{A03E53F5-D907-44DE-9066-D0B20CA53B6F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,10 @@ Global
 		{82317102-9789-4433-B9D1-8BEB670C7AF1}.Release|x64.Build.0 = Release|x64
 		{82317102-9789-4433-B9D1-8BEB670C7AF1}.Release|x86.ActiveCfg = Release|Win32
 		{82317102-9789-4433-B9D1-8BEB670C7AF1}.Release|x86.Build.0 = Release|Win32
+		{A03E53F5-D907-44DE-9066-D0B20CA53B6F}.Debug|x64.ActiveCfg = Debug
+		{A03E53F5-D907-44DE-9066-D0B20CA53B6F}.Debug|x86.ActiveCfg = Debug
+		{A03E53F5-D907-44DE-9066-D0B20CA53B6F}.Release|x64.ActiveCfg = Release
+		{A03E53F5-D907-44DE-9066-D0B20CA53B6F}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

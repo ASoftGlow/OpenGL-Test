@@ -1,17 +1,13 @@
 #pragma once
-
 //#include <string>
 
 class Logger
 {
 public:
-	Logger();
-	Logger(bool timestamped);
-
-	void info(const char* msg);
-	void error(const char* msg);
-	void debug(const char* msg);
+	static void info(const char* msg);
+	static void error(const char* msg);
+	static void debug(const char* msg);
 
 private:
-	bool timestamped;
+	static bool timestamped;
 };

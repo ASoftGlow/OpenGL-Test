@@ -1,39 +1,22 @@
 #pragma once
-
 #include <vector>
 #include <map>
 #include <iomanip>
 #include <random>
 
-#include "Chunk.h"
+#include "chunk.h"
 
 class Terrain {
 public:
-	Terrain(unsigned short* size_ptr, std::map<std::pair<int, int>, Chunk>* chunks_ptr);
+	Terrain(unsigned short* pSize, std::map<std::pair<int, int>, Chunk>* chunks_ptr);
 	Chunk* getChunk(int x, int y);
-	void generate(int chunk_x, int chunk_y);
+	void generateChunk(int chunk_x, int chunk_y);
+	void generateChunks(std::vector<std::pair<int, int>> chunks);
 	void init();
 
-	unsigned short* height, * width;
+	unsigned short* chunk_size;
 	std::map<std::pair<int, int>, Chunk>* chunks;
 
-private:
-	std::vector<Choice>* getChoices(unsigned x, unsigned y);
-	void findEasiestChoice(unsigned& x, unsigned& y, unsigned& size);
-	void collapse(Chunk* chunk, unsigned x, unsigned y);
-
-	std::vector<std::vector<Choice>> tile_choices;
-
-	std::random_device rd;
-	std::mt19937 random_gen;
-
-
-	static constexpr char rotation_pos[4][2] = {
-		{0,  1}, // N
-		{1,  0}, // E
-		{0, -1}, // S
-		{-1, 0}  // W
-	};
 	static constexpr char tile_rules[][4] = {
 		/*
 		0: full grass
@@ -146,4 +129,8 @@ private:
 		2,
 		2
 	};
+
+private:
+	std::random_device rd;
+	std::mt19937 random_gen;
 };

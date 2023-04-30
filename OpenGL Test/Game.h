@@ -1,11 +1,10 @@
 #pragma once
-
 #include <glm/glm.hpp>
 
 #include "terrain_renderer.h"
 #include "sprite_renderer.h"
-#include "Logger.h"
-#include "SaveManager.h"
+#include "logger.h"
+#include "save_manager.h"
 
 
 class Game
@@ -20,6 +19,9 @@ public:
 	void save(int id);
 	void load(int id);
 	void loadVisableChunks();
+	void quit();
+	void importSave(const char* path);
+	void exportSave(const char* path);
 	Chunk* getCurrentChunk();
 	Tile* getCurrentTile();
 
@@ -33,6 +35,5 @@ public:
 	double x = 0.0;
 	double y = 0.0;
 	Terrain* terrain;
-	Logger logger{};
 	int count = 0;
 };

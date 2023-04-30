@@ -27,27 +27,28 @@
     <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_tables.cpp" />
     <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_widgets.cpp" />
-    <ClCompile Include="Chunk.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="chunk.cpp" />
+    <ClCompile Include="chunk_generator.cpp" />
+    <ClCompile Include="game.cpp" />
+    <ClCompile Include="logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="resources.cpp" />
-    <ClCompile Include="SaveManager.cpp" />
+    <ClCompile Include="save_manager.cpp" />
     <ClCompile Include="shader_c.cpp" />
     <ClCompile Include="sprite_renderer.cpp" />
-    <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="terrain.cpp" />
     <ClCompile Include="terrain_renderer.cpp" />
     <ClCompile Include="texture_c.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\OpenGL\includes\stb_image.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="input.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="Chunk.h" />
+    <ClInclude Include="chunk_generator.h" />
+    <ClInclude Include="file_dialog.h" />
+    <ClInclude Include="game.h" />
+    <ClInclude Include="logger.h" />
+    <ClInclude Include="chunk.h" />
     <ClInclude Include="resources.hpp" />
-    <ClInclude Include="Save.h" />
-    <ClInclude Include="SaveManager.h" />
+    <ClInclude Include="save.h" />
+    <ClInclude Include="save_manager.h" />
     <ClInclude Include="shader_c.h" />
     <ClInclude Include="sprite_renderer.h" />
     <ClInclude Include="terrain.h" />
@@ -57,11 +58,8 @@
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="terrain.frag" />
-    <None Include="terrain.vert" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="assets\atlas2.png" />
+    <None Include="assets\shaders\terrain.frag" />
+    <None Include="assets\shaders\terrain.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -131,6 +129,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);C:\OpenGL\lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\OpenGL\includes\ImGui;C:\OpenGL\includes</IncludePath>
+    <SourcePath>C:\OpenGL\src\ImGui;$(SourcePath)</SourcePath>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgConfiguration>Debug</VcpkgConfiguration>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -175,7 +179,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;propsys.lib;shlwapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -184,14 +188,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3.lib;opengl32.lib;propsys.lib;shlwapi.lib;comctl32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
