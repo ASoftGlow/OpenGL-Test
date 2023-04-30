@@ -82,9 +82,10 @@ int main()
 	{
 		processInput(window);
 		//glfwGetFramebufferSize(window, &WINDOW_WIDTH, &WINDOW_HEIGHT);
+		game.update();
+
 
 		glClear(GL_COLOR_BUFFER_BIT);
-
 
 		game.render();
 

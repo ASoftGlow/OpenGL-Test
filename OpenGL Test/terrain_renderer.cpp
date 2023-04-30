@@ -29,13 +29,10 @@ void TerrainRenderer::initRenderData()
 }
 
 
-void TerrainRenderer::updateVBO(bool resize)
+void TerrainRenderer::updateVBO()
 {
-	if (resize)
-	{
-		const size_t len = this->terrain->chunks->size() * *this->terrain->height * *this->terrain->width * 2 * 3 * 4;
-		this->vertices.resize(len);
-	}
+	const size_t len = this->terrain->chunks->size() * *this->terrain->height * *this->terrain->width * 2 * 3 * 4;
+	this->vertices.resize(len);
 
 	generateVertices();
 
@@ -103,9 +100,9 @@ void TerrainRenderer::drawTerrain(Texture& atlas, float x, float y, float scale,
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(newX, newY, 0.0f));
 
-		model = glm::translate(model, glm::vec3(0.5f * scale, 0.5f * scale, 0.0f));
-		model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::translate(model, glm::vec3(-0.5f * scale, -0.5f * scale, 0.0f));
+		//model = glm::translate(model, glm::vec3(0.5f * scale, 0.5f * scale, 0.0f));
+		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+		//model = glm::translate(model, glm::vec3(-0.5f * scale, -0.5f * scale, 0.0f));
 
 		model = glm::scale(model, glm::vec3(scale, scale, 1.0f));
 

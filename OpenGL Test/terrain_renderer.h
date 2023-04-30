@@ -15,7 +15,7 @@ public:
 	TerrainRenderer(Shader shader, Terrain* terrain);
 
 	void drawTerrain(Texture& atlas, float x, float y, float scale = 1.0f, float rotation = 0.0f);
-	void updateVBO(bool resize);
+	void updateVBO();
 
 	Terrain* terrain;
 

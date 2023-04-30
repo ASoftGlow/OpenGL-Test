@@ -4,9 +4,11 @@
 #include "terrain.h"
 #include "terrain_renderer.h"
 #include "utils.h"
+#include "SaveManager.h"
 
 
-Terrain::Terrain()
+Terrain::Terrain(unsigned short* size_ptr, std::map<std::pair<int, int>, Chunk>* chunks_ptr)
+	: width(size_ptr), height(size_ptr), chunks(chunks_ptr)
 {
 	random_gen = std::mt19937(rd());
 }
@@ -38,11 +40,20 @@ void Terrain::findEasiestChoice(unsigned& x, unsigned& y, unsigned& size)
 	if (size == TerrainRenderer::atlas_size * 4 + 1) size = 1;
 }
 
+Chunk* Terrain::getChunk(int x, int y)
+{
+	const std::pair<int, int> chunk_pos = std::pair<int, int>(x, y);
+	if (!chunks->contains(chunk_pos))
+		SaveManager::loadChunk(x, y);
+		return nullptr;
+	return &chunks->at(chunk_pos);
+}
+
 void Terrain::generate(int chunk_x, int chunk_y) {
 	unsigned x, y;
 	unsigned easiest_size;
 	(*chunks)[std::pair<int, int>(chunk_x, chunk_y)] = Chunk{ chunk_x, chunk_y, width };
-	Chunk* chunk = &chunks->at(std::pair<int, int>(chunk_x, chunk_y));
+	Chunk* chunk = getChunk(chunk_x, chunk_y);
 	std::vector<Choice>* chs;
 	Choice ch;
 	std::discrete_distribution<> weighted_rand;
@@ -137,40 +148,9 @@ void Terrain::generate(int chunk_x, int chunk_y) {
 
 	// clean up
 	this->tile_choices.clear();
-
-	/*std::cout << std::endl;
-	std::cout << "Done!" << std::endl;*/
-	//for (char j = 0; j < 4; j++)
-	//{
-	//	const char* chunk_offset = rotation_pos[j];
-	//	if (chunks->size() < 2) break;
-	//	//std::cout << (int)chunk_offset[0] << " " << (int)chunk_offset[1] << std::endl;
-	//	std::pair<int, int> chunk_pos = std::pair<int, int>(chunk_x + chunk_offset[0], chunk_y + chunk_offset[1]);
-	//	if (!chunks->contains(chunk_pos))
-	//		continue;
-	//	Chunk* refChunk = &chunks->at(chunk_pos);
-
-	//	const bool isWidth = chunk_offset[0] == 0;
-	//	int x2 = (chunk_offset[0] == 1) ? *width - 1 : 0;
-	//	int y2 = (chunk_offset[1] == -1) ? *height - 1 : 0;
-
-	//	for (unsigned short i = 0; i < (isWidth ? *height : *width); i++)
-	//	{
-	//		// Get reference tile (neighbor chunk)
-	//		refChunk->getTile(
-	//			(isWidth ? (x2 + i) : (*width - 1 - x2)),
-	//			(isWidth ? (*height - 1 - y2) : (y2 + i))
-	//		)->type = Grass;
-
-	//		chunk->getTile(
-	//			x2 + (isWidth ? i : 0),
-	//			y2 + (isWidth ? 0 : i)
-	//		)->type = Sea;
-	//	}
-	//}
 }
 
-// TODO: account for neighboring chunks
+
 void Terrain::collapse(Chunk* chunk, unsigned tile_x, unsigned tile_y) {
 	Tile* t = chunk->getTile(tile_x, tile_y);
 	std::vector<Choice>* chs = getChoices(tile_x, tile_y);

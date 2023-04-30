@@ -9,12 +9,10 @@
 
 class Terrain {
 public:
-	Terrain();
-	//Tile* getTile(unsigned x, unsigned y);
-	/*
-	*/
+	Terrain(unsigned short* size_ptr, std::map<std::pair<int, int>, Chunk>* chunks_ptr);
+	
+	Chunk* getChunk(int x, int y);
 	void generate(int chunk_x, int chunk_y);
-	void collapse(Chunk* chunk, unsigned x, unsigned y);
 
 	unsigned short* height, * width;
 	std::map<std::pair<int, int>, Chunk>* chunks;
@@ -22,6 +20,7 @@ public:
 private:
 	std::vector<Choice>* getChoices(unsigned x, unsigned y);
 	void findEasiestChoice(unsigned& x, unsigned& y, unsigned& size);
+	void collapse(Chunk* chunk, unsigned x, unsigned y);
 
 	std::vector<std::vector<Choice>> tile_choices;
 
