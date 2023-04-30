@@ -41,14 +41,14 @@ void Game::init()
 
 	//SaveManager::current.chunk_size = 16;
 
-	create();
-	//SaveManager::load(1);
-	//SaveManager::loadChunk(0, 0);
-	//SaveManager::loadChunk(1, 0);
-	//SaveManager::loadChunk(0, 1);
-	//SaveManager::loadChunk(1, 1);
+	//create();
+	SaveManager::load(2);
+	SaveManager::loadChunk(0, 0);
+	SaveManager::loadChunk(1, 0);
+	SaveManager::loadChunk(0, 1);
+	SaveManager::loadChunk(1, 1);
 	//loadVisableChunks();
-	//renderer->updateVBO();
+	renderer->updateVBO();
 }
 
 

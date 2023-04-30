@@ -9,6 +9,7 @@ public:
 	* @returns `true` if successfully saved, `false` if an error occurred
 	*/ 
 	static bool save();
+	static bool saveChunk(int x, int y);
 	/*
 	* Loads a save from disk
 	* @param id - The unique id of the save
@@ -32,4 +33,7 @@ public:
 
 	inline static Save current;
 	inline static const char RELATIVE_PATH[] = "C:\\Users\\hankv\\source\\repos\\OpenGL Test\\OpenGL Test";
+
+private:
+	static size_t getChunkBlockSize();
 };
