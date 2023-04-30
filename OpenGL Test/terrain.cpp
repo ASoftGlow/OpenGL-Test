@@ -5,24 +5,19 @@
 #include "terrain_renderer.h"
 
 
-Terrain::Terrain(unsigned H, unsigned W)
+Terrain::Terrain()
 {
-	height = H;
-	width = W;
-
-	tiles.resize(static_cast<size_t>(height) * width);
-
 	random_gen = std::mt19937(rd());
 }
 
 
 Tile* Terrain::getTile(unsigned x, unsigned y) {
-	return &tiles.at(static_cast<size_t>(y) * width + x);
+	return &tiles->at(static_cast<size_t>(y) * *width + x);
 }
 
 
 std::vector<Choice>* Terrain::getChoices(unsigned x, unsigned y) {
-	return &tile_choices.at(static_cast<size_t>(y) * width + x);
+	return &tile_choices.at(static_cast<size_t>(y) * *width + x);
 }
 
 
@@ -31,8 +26,8 @@ void Terrain::findEasiestChoice(unsigned& x, unsigned& y, unsigned& size)
 	size = TerrainRenderer::atlas_size * 4 + 1;
 	unsigned short size2;
 
-	for (int k = 0; k != height; k++) {
-		for (int j = 0; j != width; j++)
+	for (int k = 0; k != *height; k++) {
+		for (int j = 0; j != *width; j++)
 		{
 			size2 = (unsigned short)getChoices(j, k)->size();
 			if (size2 < size && size2 > 1)
@@ -47,6 +42,14 @@ void Terrain::findEasiestChoice(unsigned& x, unsigned& y, unsigned& size)
 	if (size == TerrainRenderer::atlas_size * 4 + 1) size = 1;
 }
 
+void Terrain::generate(unsigned width, unsigned height)
+{
+	*this->width = width;
+	*this->height = height;
+	tiles->resize(static_cast<size_t>(height) * width);
+
+	generate();
+}
 
 void Terrain::generate() {
 	unsigned x, y;
@@ -56,19 +59,19 @@ void Terrain::generate() {
 	;
 	std::discrete_distribution<> weighted_rand;
 
-	tile_choices.resize((size_t)height * width);
+	tile_choices.resize((size_t)*height * *width);
 
 	// account for rotation
-	for (size_t i = 0; i != (size_t)height * width; i++)
+	for (size_t i = 0; i != (size_t)*height * *width; i++)
 	{
 		tile_choices[i].resize(TerrainRenderer::atlas_size);
 	}
 
-	for (int k = 0; k != height; k++) {
-		for (int j = 0; j != width; j++)
+	for (int k = 0; k != *height; k++) {
+		for (int j = 0; j != *width; j++)
 		{
 			for (unsigned short i = 0; i != TerrainRenderer::atlas_size; i++) {
-				tile_choices[static_cast<size_t>(k) * width + j][i] = Choice{ (TileType)i };
+				tile_choices[static_cast<size_t>(k) * *width + j][i] = Choice{ (TileType)i };
 			}
 		}
 	}
@@ -133,8 +136,8 @@ void Terrain::collapse(unsigned x, unsigned y) {
 		new_y = y + rotation_pos[i][1];
 
 		// check out of bounds
-		if (new_x < 0 || new_x >= width ||
-			new_y < 0 || new_y >= height) continue;
+		if (new_x < 0 || new_x >= *width ||
+			new_y < 0 || new_y >= *height) continue;
 
 		chs2 = getChoices(new_x, new_y);
 
@@ -178,14 +181,4 @@ void Terrain::collapse(unsigned x, unsigned y) {
 			collapse(new_x, new_y);
 		}
 	}
-}
-
-std::vector<Tile>* Terrain::getData()
-{
-	return &tiles;
-}
-
-void Terrain::loadData(std::vector<Tile> data)
-{
-	tiles = data;
 }

@@ -9,18 +9,26 @@
 
 class Terrain {
 public:
-	Terrain(unsigned H, unsigned W);
+	Terrain();
 	Tile* getTile(unsigned x, unsigned y);
+	void generate(unsigned width, unsigned height);
 	void generate();
 	void collapse(unsigned x, unsigned y);
-	std::vector<Tile>* getData();
+	//std::vector<Tile>* getData();
 	void loadData(std::vector<Tile> data);
 
-	unsigned height, width;
+	unsigned* height, * width;
+	std::vector<Tile>* tiles;
 
 private:
 	std::vector<Choice>* getChoices(unsigned x, unsigned y);
 	void findEasiestChoice(unsigned& x, unsigned& y, unsigned& size);
+
+	std::vector<std::vector<Choice>> tile_choices;
+
+	std::random_device rd;
+	std::mt19937 random_gen;
+
 
 	static constexpr char rotation_pos[4][2] = {
 		{0,  1}, // N
@@ -70,10 +78,4 @@ private:
 		3,
 		15,
 	};
-
-	std::vector<Tile> tiles;
-	std::vector<std::vector<Choice>> tile_choices;
-
-	std::random_device rd;
-	std::mt19937 random_gen;
 };

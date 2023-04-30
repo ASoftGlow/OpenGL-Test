@@ -5,6 +5,7 @@
 #include "terrain_renderer.h"
 #include "sprite_renderer.h"
 #include "Logger.h"
+#include "SaveManager.h"
 
 
 class Game
@@ -18,11 +19,12 @@ public:
 	void load();
 
 	float scale = 8.0f;
-	Logger logger{};
 
 //private:
 	float pan_speed = 1.25f;
 	float x = 0.f;
 	float y = 0.f;
 	Terrain* terrain;
+	Logger logger{};
+	int count = 0;
 };

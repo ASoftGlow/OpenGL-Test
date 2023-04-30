@@ -27,9 +27,6 @@ public:
 	static void freeImageData(unsigned char* data);
 	static void clear();
 
-	static void save(Terrain* terrain, const char* filePath);
-	static void load(Terrain* terrain, const char* filePath);
-
 private:
 	static Texture loadTextureFromFile(const char* filePath, bool alpha, bool flip = true);
 	static std::string loadFromFile(const char* filePath);

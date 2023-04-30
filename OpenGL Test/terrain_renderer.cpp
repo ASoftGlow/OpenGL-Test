@@ -6,7 +6,7 @@ TerrainRenderer::TerrainRenderer(Shader shader, Terrain* terrain)
 	this->shader = shader;
 	this->terrain = terrain;
 
-	const unsigned long len = this->terrain->height * this->terrain->width * 2 * 3 * 4;
+	const unsigned long len = *this->terrain->height * *this->terrain->width * 2 * 3 * 4;
 	this->vertices.resize(len);
 
 	this->initRenderData();
@@ -37,7 +37,7 @@ void TerrainRenderer::updateVBO(bool resize)
 {
 	if (resize)
 	{
-		const unsigned long len = this->terrain->height * this->terrain->width * 2 * 3 * 4;
+		const unsigned long len = *this->terrain->height * *this->terrain->width * 2 * 3 * 4;
 		this->vertices.resize(len);
 	}
 
@@ -55,19 +55,19 @@ void TerrainRenderer::generateVertices()
 	unsigned long long ind;
 
 	// gen vertices
-	for (unsigned y = 0; y != this->terrain->height; y++) {
-		for (unsigned x = 0; x != this->terrain->width; x++)
+	for (unsigned y = 0; y != *this->terrain->height; y++) {
+		for (unsigned x = 0; x != *this->terrain->width; x++)
 		{
 			tile = this->terrain->getTile(x, y);
 
 			// 2 tri, 3 vert per
-			ind = (x + y * this->terrain->width) * 24;
+			ind = (x + y * *this->terrain->width) * 24;
 
 			for (char j = 0; j < 12; j += 2)
 			{
 				// pos
 				this->vertices[ind + j * 2 + 0] = quad_pos[j + 0] + x;
-				this->vertices[ind + j * 2 + 1] = quad_pos[j + 1] + this->terrain->height - y;
+				this->vertices[ind + j * 2 + 1] = quad_pos[j + 1] + *this->terrain->height - y;
 
 				// tex
 				const char* tile_tex_pos = tiles_tex_pos[tile->type];
@@ -85,8 +85,8 @@ void TerrainRenderer::generateVertices()
 
 void TerrainRenderer::drawTerrain(Texture& atlas, float x, float y, float scale, float rotation)
 {
-	x -= scale * this->terrain->width / 2;
-	y -= scale * this->terrain->height / 2;
+	x -= scale * *this->terrain->width / 2;
+	y -= scale * *this->terrain->height / 2;
 	y -= scale;
 
 	glm::mat4 model = glm::mat4(1.0f);
@@ -103,7 +103,7 @@ void TerrainRenderer::drawTerrain(Texture& atlas, float x, float y, float scale,
 	glActiveTexture(GL_TEXTURE0);
 	atlas.bind();
 
-	unsigned long len = this->terrain->height * this->terrain->width * 3 * 2;
+	unsigned long len = *this->terrain->height * *this->terrain->width * 3 * 2;
 
 	glBindVertexArray(this->quadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, len);

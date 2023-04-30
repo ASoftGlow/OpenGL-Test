@@ -23,6 +23,8 @@ enum TileType {
 	Sea,
 };
 
+const unsigned TILE_SIZE = sizeof(char);
+
 struct Tile {
 	TileType type;
 };

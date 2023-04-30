@@ -5,15 +5,14 @@
 
 class SaveManager {
 public:
-	SaveManager();
-
-	int save();
-	void save(unsigned id);
-	void load(unsigned id);
+	static void save();
+	static void save(int id);
+	static void load(int id);
 	// TODO: error handling
-	void newSave();
-	void deleteSave();
-	void deleteAll();
+	static void newSave();
+	static void deleteSave();
+	static void deleteAll();
 
-	Save current_save;
+	inline static Save current;
+	inline static const char RELATIVE_PATH[] = "C:\\Users\\hankv\\source\\repos\\OpenGL Test\\OpenGL Test";
 };

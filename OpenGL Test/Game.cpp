@@ -27,8 +27,11 @@ void Game::init()
 	Resources::loadTexture("assets/atlas2.png", true, "terrain_atlas", false);
 
 	// random_gen terrain
-	terrain = new Terrain{ 20,20 };
-	terrain->generate();
+	terrain = new Terrain{};
+	terrain->width = &SaveManager::current.width;
+	terrain->height = &SaveManager::current.height;
+	terrain->tiles = &SaveManager::current.tileData;
+	terrain->generate(20, 20);
 
 	// create renderers
 	renderer = new TerrainRenderer(*Resources::getShader("terrain"), terrain);
@@ -58,13 +61,18 @@ void Game::update()
 
 void Game::save()
 {
-	Resources::save(terrain, "\\saves\\test\\game.data");
+	count++;
+	std::cout << count;
+	SaveManager::save(count);
 	logger.info("Game saved");
 }
 
 void Game::load()
 {
-	Resources::load(terrain, "\\saves\\test\\game.data");
+	// Skip is already loaded
+	//if (SaveManager::current.id == count) return;
+	std::cout << count;
+	SaveManager::load(count);
 	renderer->updateVBO(true);
 	logger.info("Game loaded");
 }

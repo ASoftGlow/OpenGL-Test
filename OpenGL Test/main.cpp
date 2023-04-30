@@ -37,6 +37,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, 0);
 	//glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, 1);
 	//glfwWindowHint(GLFW_DECORATED, 0);
 
@@ -54,8 +55,7 @@ int main()
 	glfwSetCursorPosCallback(window, cursor_position_callback);
 	glfwSwapInterval(1); // vsync
 	//glfwSetWindowOpacity(window, 0.5f);
-	GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
-	glfwSetCursor(window, cursor);
+
 
 	// icon
 	GLFWimage images[3] = {
@@ -165,8 +165,20 @@ void processInput(GLFWwindow* window)
 		if (press) return;
 		press = true;
 
+		game.update();
+	}
+	else if (glfwGetKey(window, GLFW_KEY_4)) {
+		if (press) return;
+		press = true;
+
+		game.save();
+
+	}
+	else if (glfwGetKey(window, GLFW_KEY_5)) {
+		if (press) return;
+		press = true;
+
 		game.load();
-		//game.update();
 	}
 	else {
 		press = false;
