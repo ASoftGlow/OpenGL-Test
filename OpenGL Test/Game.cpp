@@ -39,46 +39,60 @@ void Game::init()
 	// create renderers
 	renderer = new TerrainRenderer(*terrain_shader, terrain);
 
-	//SaveManager::current.chunk_size = 16;
-
 	//create();
-	SaveManager::load(2);
-	SaveManager::loadChunk(0, 0);
-	SaveManager::loadChunk(1, 0);
-	SaveManager::loadChunk(0, 1);
-	SaveManager::loadChunk(1, 1);
+	//SaveManager::newSave(3);
+	//SaveManager::load(3);
+	//save();
+	//terrain->init();
 	//loadVisableChunks();
-	renderer->updateVBO();
+	//renderer->updateVBO();
+}
+
+
+Chunk* Game::getCurrentChunk()
+{
+	return terrain->getChunk(
+		-(int)floor(pan_x / (*terrain->width * 8) + 0.5),
+		(int)floor(pan_y / (*terrain->height * 8) + 0.5)
+	);
 }
 
 
 void Game::loadVisableChunks()
 {
-	const int current_chunk_x = -(int)floor(zoom * this->x / *terrain->width / 8 + 0.5);
-	const int current_chunk_y = (int)floor(zoom * this->y / *terrain->height / 8 + 0.5);
+	const int current_chunk_x = -(int)floor(pan_x / (*terrain->width * 8) + 0.5);
+	const int current_chunk_y = (int)floor(pan_y / (*terrain->height * 8) + 0.5);
 
-	const float offset_from_chunk_x = this->x - ((current_chunk_x - 0.5) * *terrain->width * 8);
-	const float offset_from_chunk_y = this->y - ((current_chunk_y - 0.5) * *terrain->height * 8);
+	const float offset_from_chunk_x = (float)(pan_x / (*terrain->width * 8) + 0.5) + current_chunk_x;
+	const float offset_from_chunk_y = (float)(pan_y / (*terrain->height * 8) + 0.5) - current_chunk_y;
 
-	const int view_chunk_length = window_width / 8 / *terrain->width / zoom + 2;// + (offset_from_chunk_x >= (*terrain->width * 8));
-	const int view_chunk_height = window_height / 8 / *terrain->height / zoom + 2;// +();
-	//std::cout << view_chunk_length << std::endl;
+	const int view_chunk_length = (int)ceil((float)window_width / 8 / *terrain->width / zoom);// + (offset_from_chunk_x >= (*terrain->width * 8));
+	const int view_chunk_height = (int)ceil((float)window_height / 8 / *terrain->height / zoom);// +();
+
+	std::vector<std::pair<int, int>> chunksToGenerate;
+	//printf("\rzoom: %f chunk: (%f,%f) ", zoom, offset_from_chunk_x, offset_from_chunk_y);
+	// Load existing chunks 
 	for (int j = 0; j < view_chunk_height + (view_chunk_height % 2 == 0); j++)
 	{
 		if (j == -1) std::cout << j;
 		for (int k = 0; k < view_chunk_length + (view_chunk_length % 2 == 0); k++)
 		{
-			int y = current_chunk_y - floor(view_chunk_height / 2) + j;
-			int x = current_chunk_x - floor(view_chunk_length / 2) + k;
+			int y = current_chunk_y - (int)(view_chunk_height / 2) + j;
+			int x = current_chunk_x - (int)(view_chunk_length / 2) + k;
 
-			//std::cout << "x: " << x << " y: " << y << std::endl;
 			Chunk* chunk = terrain->getChunk(x, y);
 			if (chunk == nullptr)
 			{
-				std::cout << "generating chunk at " << x << " " << y << std::endl;
-				terrain->generate(x, y);
+				chunksToGenerate.push_back(std::pair<int, int>(x, y));
 			}
 		}
+	}
+
+	// Create unexisting chunks
+	for (auto& [x, y] : chunksToGenerate)
+	{
+		printf("Generating chunk (%i,%i)\n", x, y);
+		terrain->generate(x, y);
 	}
 }
 
@@ -89,8 +103,8 @@ void Game::render()
 	renderer->drawTerrain(
 		*Resources::getTexture("terrain_atlas"),
 		*Resources::getTexture("foliage_mask"),
-		this->x * 1 * zoom + (float)window_width / 2,
-		this->y * 1 * zoom + (float)window_height / 2,
+		this->pan_x * zoom + (float)window_width / 2,
+		this->pan_y * zoom + (float)window_height / 2,
 		this->zoom * 8,
 		0.0f);
 
@@ -111,27 +125,42 @@ void Game::update()
 
 void Game::save()
 {
-	SaveManager::save();
-	logger.info("Game saved");
+	if (SaveManager::save())
+		logger.info("Saved");
+	else
+		logger.error("Failed to save");
 }
 
-void Game::load()
+void Game::save(int id)
 {
-	SaveManager::load(count);
-	renderer->updateVBO();
-	logger.info("Game loaded");
+	SaveManager::current.id = id;
+	save();
+}
+
+void Game::load(int id)
+{
+	if (SaveManager::load(id))
+	{
+		terrain->init();
+		loadVisableChunks();
+		renderer->updateVBO();
+		logger.info("Loaded save id: ");
+		printf("%i", id);
+	}
+	else
+		logger.error("Failed to load");
 }
 
 void Game::create()
 {
-	SaveManager::newSave(2);
+	SaveManager::newSave("My World");
 	terrain->init();
 	// First chunks
-	//while (1)
-	terrain->generate(0, 0);
+	/*terrain->generate(0, 0);
 	terrain->generate(1, 0);
 	terrain->generate(0, 1);
-	terrain->generate(1, 1);
+	terrain->generate(1, 1);*/
+	loadVisableChunks();
 
 	renderer->updateVBO();
 }

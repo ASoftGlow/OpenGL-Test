@@ -20,3 +20,8 @@ void Logger::debug(const char* msg)
 {
 	std::cout << "[DEBUG] " << msg << std::endl;
 }
+
+void Logger::error(const char* msg)
+{
+	std::cout << "[ERROR] " << msg << std::endl;
+}

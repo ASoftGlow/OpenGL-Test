@@ -54,7 +54,7 @@
     <ClCompile Include="terrain_renderer.cpp">
       <Filter>Rendering\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="terrain.cpp">
+    <ClCompile Include="Terrain.cpp">
       <Filter>Terrain Generation\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sprite_renderer.cpp">
@@ -74,6 +74,27 @@
     </ClCompile>
     <ClCompile Include="SaveManager.cpp">
       <Filter>Game\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_demo.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_draw.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_impl_glfw.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_impl_opengl3.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_tables.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_widgets.cpp">
+      <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

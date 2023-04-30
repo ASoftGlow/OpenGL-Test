@@ -28,12 +28,11 @@ std::vector<Choice>* Terrain::getChoices(unsigned x, unsigned y) {
 void Terrain::findEasiestChoice(unsigned& x, unsigned& y, unsigned& size)
 {
 	size = TerrainRenderer::atlas_size * 4 + 1;
-	unsigned short size2;
 
 	for (int k = 0; k != *height; k++) {
 		for (int j = 0; j != *width; j++)
 		{
-			size2 = (unsigned short)getChoices(j, k)->size();
+			unsigned short size2 = (unsigned short)getChoices(j, k)->size();
 			if (size2 < size && size2 > 1)
 			{
 				size = size2;
@@ -57,15 +56,8 @@ Chunk* Terrain::getChunk(int x, int y)
 	return &chunks->at(chunk_pos);
 }
 
-void Terrain::generate(int chunk_x, int chunk_y) {
-	unsigned x, y;
-	unsigned easiest_size;
-	(*chunks)[std::pair<int, int>(chunk_x, chunk_y)] = Chunk{ chunk_x, chunk_y, width };
-	Chunk* chunk = getChunk(chunk_x, chunk_y);
-	std::vector<Choice>* chs;
-	Choice ch;
-	std::discrete_distribution<> weighted_rand;
-
+void Terrain::generate(int chunk_x, int chunk_y) 
+{
 	for (size_t i = 0; i != (size_t)*height * *width; i++)
 	{
 		tile_choices[i].resize(TerrainRenderer::atlas_size);
@@ -108,7 +100,7 @@ void Terrain::generate(int chunk_x, int chunk_y) {
 			);
 
 			char rule = tile_rules[tile->type][isWidth ? j : (j + 2) % 4];
-			unsigned short len = choices->size();
+			unsigned short len = (unsigned short)choices->size();
 
 			// compare each Choice
 			for (unsigned short h = 0; h != len; h++)
@@ -127,17 +119,22 @@ void Terrain::generate(int chunk_x, int chunk_y) {
 		}
 	}
 
+	(*chunks)[std::pair<int, int>(chunk_x, chunk_y)] = Chunk{ chunk_x, chunk_y, width };
+	Chunk* chunk = getChunk(chunk_x, chunk_y);
+
 	int count = 0;
 	while (true)
 	{
 		count++;
+		unsigned x, y;
+		unsigned easiest_size;
 		findEasiestChoice(x, y, easiest_size);
 		if (easiest_size == 1) {
 			break;
 		}
 
 		// pick a choice and isolate it
-		chs = getChoices(x, y);
+		std::vector<Choice>* chs = getChoices(x, y);
 		// get weights and setup random distribution
 		std::vector<short> weights;
 		weights.reserve(chs->size());
@@ -146,9 +143,9 @@ void Terrain::generate(int chunk_x, int chunk_y) {
 			weights.push_back(tile_weights[c.type]);
 		}
 
-		weighted_rand = std::discrete_distribution<>{ weights.begin(),weights.end() };
+		std::discrete_distribution<> weighted_rand = std::discrete_distribution<>{ weights.begin(),weights.end() };
 
-		ch = chs->at(weighted_rand(random_gen));
+		Choice ch = chs->at(weighted_rand(random_gen));
 
 		chs->clear();
 		chs->push_back(ch);
@@ -164,12 +161,6 @@ void Terrain::generate(int chunk_x, int chunk_y) {
 void Terrain::collapse(Chunk* chunk, unsigned tile_x, unsigned tile_y) {
 	Tile* t = chunk->getTile(tile_x, tile_y);
 	std::vector<Choice>* chs = getChoices(tile_x, tile_y);
-	std::vector<Choice>* chs2;
-	Choice chs_t, chs2_t;
-	int new_x, new_y;
-	unsigned short old_len, len;
-	bool isMatch;
-	char rule, rule2;
 
 	if (chs->size() == 1)
 	{
@@ -179,31 +170,32 @@ void Terrain::collapse(Chunk* chunk, unsigned tile_x, unsigned tile_y) {
 	// iterator over surrounding tiles
 	for (char i = 0; i != 4; i++)
 	{
-		new_x = tile_x + rotation_pos[i][0];
-		new_y = tile_y + rotation_pos[i][1];
+		int new_x = tile_x + rotation_pos[i][0];
+		int new_y = tile_y + rotation_pos[i][1];
 
 		// check out of bounds
 		if (new_x < 0 || new_x >= *width ||
 			new_y < 0 || new_y >= *height)
 			continue;
 
-		chs2 = getChoices(new_x, new_y);
+		std::vector<Choice>* chs2 = getChoices(new_x, new_y);
 
 
-		old_len = len = (unsigned short)chs2->size();
+		unsigned short old_len = (unsigned short)chs2->size();
+		unsigned short len = old_len;
 
 		// compare each Choice
 		for (unsigned short h = 0; h != len; h++)
 		{
-			isMatch = false;
-			chs2_t = chs2->at(h);
+			bool isMatch = false;
+			const Choice chs2_t = chs2->at(h);
 			// opposite side
-			rule2 = tile_rules[chs2_t.type][(i + 2) % 4];
+			const char rule2 = tile_rules[chs2_t.type][(i + 2) % 4];
 
 			for (int j = 0; j != chs->size(); j++)
 			{
-				chs_t = chs->at(j);
-				rule = tile_rules[chs_t.type][i];
+				const Choice chs_t = chs->at(j);
+				const char rule = tile_rules[chs_t.type][i];
 
 				if (rule == rule2)
 				{

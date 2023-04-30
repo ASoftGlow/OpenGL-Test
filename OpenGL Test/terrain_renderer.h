@@ -14,7 +14,7 @@ class TerrainRenderer
 public:
 	TerrainRenderer(Shader shader, Terrain* terrain);
 
-	void drawTerrain(Texture& atlas, Texture& foliage, float x, float y, float scale = 1.0f, float rotation = 0.0f);
+	void drawTerrain(Texture& atlas, Texture& foliage, double x, double y, float scale = 1.0f, float rotation = 0.0f);
 	void updateVBO();
 
 	Terrain* terrain;

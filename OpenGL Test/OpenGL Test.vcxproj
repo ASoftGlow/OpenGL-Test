@@ -20,6 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\..\OpenGL\src\glad.c" />
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -28,7 +35,7 @@
     <ClCompile Include="SaveManager.cpp" />
     <ClCompile Include="shader_c.cpp" />
     <ClCompile Include="sprite_renderer.cpp" />
-    <ClCompile Include="terrain.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="terrain_renderer.cpp" />
     <ClCompile Include="texture_c.cpp" />
   </ItemGroup>
@@ -118,8 +125,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\hankv\source\repos\OpenGL Test\OpenGL Test;C:\OpenGL\includes;C:\Users\hankv\source\repos\OpenGL Test\OpenGL Test;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\hankv\source\repos\OpenGL Test\OpenGL Test;C:\OpenGL\includes;$(IncludePath)</IncludePath>
     <LibraryPath>C:\OpenGL\lib;$(LibraryPath)</LibraryPath>
+    <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -157,10 +165,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <EnableModules>false</EnableModules>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

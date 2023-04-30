@@ -44,8 +44,6 @@ void TerrainRenderer::updateVBO()
 
 void TerrainRenderer::generateVertices()
 {
-	Tile* tile;
-	size_t ind;
 	size_t count = 0;
 
 	for (auto& [pos, chunk] : *this->terrain->chunks)
@@ -54,10 +52,10 @@ void TerrainRenderer::generateVertices()
 		for (unsigned y = 0; y != *this->terrain->height; y++) {
 			for (unsigned x = 0; x != *this->terrain->width; x++)
 			{
-				tile = chunk.getTile(x, y);
+				Tile* tile = chunk.getTile(x, y);
 
 				// 2 tri, 3 vert per
-				ind = (x + y * *this->terrain->width) * 2 * 3 * 4 + (count * *this->terrain->height * *this->terrain->width * 2 * 3 * 4);
+				size_t ind = (x + y * *this->terrain->width) * 2 * 3 * 4 + (count * *this->terrain->height * *this->terrain->width * 2 * 3 * 4);
 
 				for (char j = 0; j < 12; j += 2)
 				{
@@ -81,11 +79,9 @@ void TerrainRenderer::generateVertices()
 }
 
 
-void TerrainRenderer::drawTerrain(Texture& atlas, Texture& foliage, float x, float y, float scale, float rotation)
+void TerrainRenderer::drawTerrain(Texture& atlas, Texture& foliage, double x, double y, float scale, float rotation)
 {
-	float newX, newY;
-	glm::mat4 model;
-	const size_t len = (unsigned)*this->terrain->height * *this->terrain->width * 3 * 2;
+	const size_t len = (size_t)*this->terrain->height * *this->terrain->width * 3 * 2;
 	size_t chunk_index = 0;
 
 	glActiveTexture(GL_TEXTURE0);
@@ -97,10 +93,10 @@ void TerrainRenderer::drawTerrain(Texture& atlas, Texture& foliage, float x, flo
 
 	for (auto& [pos, chunk] : *this->terrain->chunks)
 	{
-		newX = x - scale * (*this->terrain->width / 2 - pos.first * *this->terrain->width);
-		newY = y - scale * (*this->terrain->height / 2 + pos.second * *this->terrain->height - 1);
+		double newX = x - scale * ((float)*this->terrain->width / 2 - pos.first * *this->terrain->width);
+		double newY = y - scale * ((float)*this->terrain->height / 2 + pos.second * *this->terrain->height);
 
-		model = glm::mat4(1.0f);
+		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(newX, newY, 0.0f));
 
 		//model = glm::translate(model, glm::vec3(0.5f * zoom, 0.5f * zoom, 0.0f));

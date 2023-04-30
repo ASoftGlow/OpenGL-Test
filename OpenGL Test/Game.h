@@ -17,16 +17,21 @@ public:
 	void render();
 	void create();
 	void save();
-	void load();
+	void save(int id);
+	void load(int id);
 	void loadVisableChunks();
+	Chunk* getCurrentChunk();
+	Tile* getCurrentTile();
 
 	int window_width, window_height;
-	float zoom = 2.f;
+	float zoom = 4.f;
 
 //private:
-	float pan_speed = 1.0f;
-	float x = 0.f;
-	float y = 0.f;
+	float pan_speed = 2.0f;
+	double pan_x = 0.0;
+	double pan_y = 10.0;
+	double x = 0.0;
+	double y = 0.0;
 	Terrain* terrain;
 	Logger logger{};
 	int count = 0;
