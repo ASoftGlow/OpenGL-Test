@@ -25,14 +25,20 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Rendering\Source Files\Shaders Files">
+    <Filter Include="Game">
+      <UniqueIdentifier>{6948ca2d-1879-4a8f-b1f4-6bd2cccf5ca0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Header Files">
+      <UniqueIdentifier>{52ff1a46-f596-458c-ab35-30ed8749aeb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Source Files">
+      <UniqueIdentifier>{d5478d2c-47ab-42ce-a839-472de5cfb807}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Source Files\Shader Files">
       <UniqueIdentifier>{c8d21ec4-e33d-404f-b1eb-b370662a6558}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Rendering\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="texture_c.cpp">
       <Filter>Rendering\Source Files</Filter>
     </ClCompile>
@@ -40,9 +46,6 @@
       <Filter>Rendering\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="resources.cpp">
-      <Filter>Rendering\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Game.cpp">
       <Filter>Rendering\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\OpenGL\src\glad.c">
@@ -57,17 +60,23 @@
     <ClCompile Include="sprite_renderer.cpp">
       <Filter>Rendering\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Chunk.cpp">
+      <Filter>Terrain Generation\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Game\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Game\Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Logger.cpp">
-      <Filter>Rendering\Source Files</Filter>
+      <Filter>Game\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SaveManager.cpp">
-      <Filter>Rendering\Source Files</Filter>
+      <Filter>Game\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game.h">
-      <Filter>Rendering\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="shader_c.h">
       <Filter>Rendering\Header Files</Filter>
     </ClInclude>
@@ -98,19 +107,28 @@
     <ClInclude Include="input.h">
       <Filter>Rendering\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Chunk.h">
+      <Filter>Terrain Generation\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Logger.h">
-      <Filter>Rendering\Header Files</Filter>
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveManager.h">
+      <Filter>Game\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Save.h">
-      <Filter>Rendering\Header Files</Filter>
+      <Filter>Game\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="terrain.frag">
-      <Filter>Rendering\Source Files\Shaders Files</Filter>
+      <Filter>Rendering\Source Files\Shader Files</Filter>
     </None>
     <None Include="terrain.vert">
-      <Filter>Rendering\Source Files\Shaders Files</Filter>
+      <Filter>Rendering\Source Files\Shader Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

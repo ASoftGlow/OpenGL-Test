@@ -6,7 +6,6 @@
 class SaveManager {
 public:
 	static void save();
-	static void save(int id);
 	static void load(int id);
 	// TODO: error handling
 	static void newSave();

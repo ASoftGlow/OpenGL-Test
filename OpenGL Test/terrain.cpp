@@ -3,16 +3,12 @@
 
 #include "terrain.h"
 #include "terrain_renderer.h"
+#include "utils.h"
 
 
 Terrain::Terrain()
 {
 	random_gen = std::mt19937(rd());
-}
-
-
-Tile* Terrain::getTile(unsigned x, unsigned y) {
-	return &tiles->at(static_cast<size_t>(y) * *width + x);
 }
 
 
@@ -42,26 +38,16 @@ void Terrain::findEasiestChoice(unsigned& x, unsigned& y, unsigned& size)
 	if (size == TerrainRenderer::atlas_size * 4 + 1) size = 1;
 }
 
-void Terrain::generate(unsigned width, unsigned height)
-{
-	*this->width = width;
-	*this->height = height;
-	tiles->resize(static_cast<size_t>(height) * width);
-
-	generate();
-}
-
-void Terrain::generate() {
+void Terrain::generate(int chunk_x, int chunk_y) {
 	unsigned x, y;
 	unsigned easiest_size;
+	(*chunks)[std::pair<int, int>(chunk_x, chunk_y)] = Chunk{ chunk_x, chunk_y, width };
+	Chunk* chunk = &chunks->at(std::pair<int, int>(chunk_x, chunk_y));
 	std::vector<Choice>* chs;
 	Choice ch;
-	;
 	std::discrete_distribution<> weighted_rand;
 
 	tile_choices.resize((size_t)*height * *width);
-
-	// account for rotation
 	for (size_t i = 0; i != (size_t)*height * *width; i++)
 	{
 		tile_choices[i].resize(TerrainRenderer::atlas_size);
@@ -72,6 +58,53 @@ void Terrain::generate() {
 		{
 			for (unsigned short i = 0; i != TerrainRenderer::atlas_size; i++) {
 				tile_choices[static_cast<size_t>(k) * *width + j][i] = Choice{ (TileType)i };
+			}
+		}
+	}
+
+	// Update Choices based on existing surrounding chunks
+	for (char j = 0; j < 4; j++)
+	{
+		const char* chunk_offset = rotation_pos[j];
+		std::pair<int, int> chunk_pos = std::pair<int, int>(chunk_x + chunk_offset[0], chunk_y + chunk_offset[1]);
+		if (!chunks->contains(chunk_pos))
+			// No neighbor
+			continue;
+		Chunk* refChunk = &chunks->at(chunk_pos);
+
+		const bool isWidth = chunk_offset[0] == 0;
+		int x2 = (chunk_offset[0] == 1) ? *width - 1 : 0;
+		int y2 = (chunk_offset[1] == -1) ? *height - 1 : 0;
+
+		for (unsigned short i = 0; i < (isWidth ? *height : *width); i++)
+		{
+			// Get reference tile (neighbor chunk)
+			Tile* tile = refChunk->getTile(
+				(isWidth ? (x2 + i) : (*width - 1 - x2)),
+				(isWidth ? (*height - 1 - y2) : (y2 + i))
+			);
+			// Get end tile choices (current gen)
+			std::vector<Choice>* choices = getChoices(
+				x2 + (isWidth ? i : 0),
+				y2 + (isWidth ? 0 : i)
+			);
+
+			char rule = tile_rules[tile->type][isWidth ? j : (j + 2) % 4];
+			unsigned short len = choices->size();
+
+			// compare each Choice
+			for (unsigned short h = 0; h != len; h++)
+			{
+				Choice choice = choices->at(h);
+				// opposite side
+				char rule2 = tile_rules[choice.type][isWidth ? (j + 2) % 4 : j];
+
+				if (rule == rule2)
+					continue;
+
+				choices->erase(choices->begin() + h);
+				len--;
+				h--;
 			}
 		}
 	}
@@ -99,30 +132,54 @@ void Terrain::generate() {
 		chs->clear();
 		chs->push_back(ch);
 
-		collapse(x, y);
+		collapse(chunk, x, y);
 	}
 
 	// clean up
 	this->tile_choices.clear();
 
-	//for (int i = 0; i != this->tiles.size(); i++) {
-	//	std::cout << this->tiles[i].type << " ";
+	/*std::cout << std::endl;
+	std::cout << "Done!" << std::endl;*/
+	//for (char j = 0; j < 4; j++)
+	//{
+	//	const char* chunk_offset = rotation_pos[j];
+	//	if (chunks->size() < 2) break;
+	//	//std::cout << (int)chunk_offset[0] << " " << (int)chunk_offset[1] << std::endl;
+	//	std::pair<int, int> chunk_pos = std::pair<int, int>(chunk_x + chunk_offset[0], chunk_y + chunk_offset[1]);
+	//	if (!chunks->contains(chunk_pos))
+	//		continue;
+	//	Chunk* refChunk = &chunks->at(chunk_pos);
+
+	//	const bool isWidth = chunk_offset[0] == 0;
+	//	int x2 = (chunk_offset[0] == 1) ? *width - 1 : 0;
+	//	int y2 = (chunk_offset[1] == -1) ? *height - 1 : 0;
+
+	//	for (unsigned short i = 0; i < (isWidth ? *height : *width); i++)
+	//	{
+	//		// Get reference tile (neighbor chunk)
+	//		refChunk->getTile(
+	//			(isWidth ? (x2 + i) : (*width - 1 - x2)),
+	//			(isWidth ? (*height - 1 - y2) : (y2 + i))
+	//		)->type = Grass;
+
+	//		chunk->getTile(
+	//			x2 + (isWidth ? i : 0),
+	//			y2 + (isWidth ? 0 : i)
+	//		)->type = Sea;
+	//	}
 	//}
-	//std::cout << std::endl;
-	//std::cout << "Done!" << std::endl;
 }
 
-
-void Terrain::collapse(unsigned x, unsigned y) {
-	Tile* t = getTile(x, y);
-	std::vector<Choice>* chs = getChoices(x, y);
+// TODO: account for neighboring chunks
+void Terrain::collapse(Chunk* chunk, unsigned tile_x, unsigned tile_y) {
+	Tile* t = chunk->getTile(tile_x, tile_y);
+	std::vector<Choice>* chs = getChoices(tile_x, tile_y);
 	std::vector<Choice>* chs2;
 	Choice chs_t, chs2_t;
 	int new_x, new_y;
 	unsigned short old_len, len;
 	bool isMatch;
 	char rule, rule2;
-
 
 	if (chs->size() == 1)
 	{
@@ -132,14 +189,16 @@ void Terrain::collapse(unsigned x, unsigned y) {
 	// iterator over surrounding tiles
 	for (char i = 0; i != 4; i++)
 	{
-		new_x = x + rotation_pos[i][0];
-		new_y = y + rotation_pos[i][1];
+		new_x = tile_x + rotation_pos[i][0];
+		new_y = tile_y + rotation_pos[i][1];
 
 		// check out of bounds
 		if (new_x < 0 || new_x >= *width ||
-			new_y < 0 || new_y >= *height) continue;
+			new_y < 0 || new_y >= *height)
+			continue;
 
 		chs2 = getChoices(new_x, new_y);
+
 
 		old_len = len = (unsigned short)chs2->size();
 
@@ -178,7 +237,7 @@ void Terrain::collapse(unsigned x, unsigned y) {
 		}
 
 		if (len != old_len) {
-			collapse(new_x, new_y);
+			collapse(chunk, new_x, new_y);
 		}
 	}
 }

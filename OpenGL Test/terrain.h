@@ -1,24 +1,23 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include <iomanip>
 #include <random>
 
-#include "tile.h"
-
+#include "Chunk.h"
 
 class Terrain {
 public:
 	Terrain();
-	Tile* getTile(unsigned x, unsigned y);
-	void generate(unsigned width, unsigned height);
-	void generate();
-	void collapse(unsigned x, unsigned y);
-	//std::vector<Tile>* getData();
-	void loadData(std::vector<Tile> data);
+	//Tile* getTile(unsigned x, unsigned y);
+	/*
+	*/
+	void generate(int chunk_x, int chunk_y);
+	void collapse(Chunk* chunk, unsigned x, unsigned y);
 
-	unsigned* height, * width;
-	std::vector<Tile>* tiles;
+	unsigned short* height, * width;
+	std::map<std::pair<int, int>, Chunk>* chunks;
 
 private:
 	std::vector<Choice>* getChoices(unsigned x, unsigned y);
@@ -43,20 +42,20 @@ private:
 		2,3: land/sea
 		*/
 		// 0,1,2,3
-	  // N,E,S,W
+	  // S,E,N,W
 		{0,0,0,0}, // land
-		{0,0,3,3}, // land L corner
-		{3,0,0,2},
-		{2,2,0,0},
-		{0,3,2,0},
-		{0,3,1,3}, // half land/sea
+		{3,0,0,3}, // land L corner
+		{0,0,3,2},
+		{0,2,2,0},
+		{2,3,0,0},
+		{1,3,0,3}, // half land/sea
 		{3,0,3,1},
-		{1,2,0,2},
+		{0,2,1,2},
 		{2,1,2,0},
-		{3,3,1,1}, // sea L corner
-		{1,2,3,1},
-		{1,1,2,2},
-		{2,1,1,3},
+		{1,3,3,1}, // sea L corner
+		{3,2,1,1},
+		{2,1,1,2},
+		{1,1,2,3},
 		{0,0,0,0},  // rock
 		{1,1,1,1} // sea
 
@@ -75,7 +74,7 @@ private:
 		1,
 		1,
 		1,
-		3,
+		1,
 		15,
 	};
 };

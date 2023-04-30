@@ -28,13 +28,18 @@ void Game::init()
 
 	// random_gen terrain
 	terrain = new Terrain{};
-	terrain->width = &SaveManager::current.width;
-	terrain->height = &SaveManager::current.height;
-	terrain->tiles = &SaveManager::current.tileData;
-	terrain->generate(20, 20);
+	terrain->width = &SaveManager::current.chunk_size;
+	terrain->height = &SaveManager::current.chunk_size;
+	terrain->chunks = &SaveManager::current.chunks;
 
 	// create renderers
 	renderer = new TerrainRenderer(*Resources::getShader("terrain"), terrain);
+
+	create(16);
+	terrain->generate(1, 0);
+	terrain->generate(0, 1);
+	terrain->generate(1, 1);
+	renderer->updateVBO(true);
 }
 
 
@@ -55,15 +60,13 @@ void Game::render()
 
 void Game::update()
 {
-	terrain->generate();
+	create(SaveManager::current.chunk_size);
 	renderer->updateVBO(false);
 }
 
 void Game::save()
 {
-	count++;
-	std::cout << count;
-	SaveManager::save(count);
+	SaveManager::save();
 	logger.info("Game saved");
 }
 
@@ -71,8 +74,19 @@ void Game::load()
 {
 	// Skip is already loaded
 	//if (SaveManager::current.id == count) return;
-	std::cout << count;
 	SaveManager::load(count);
 	renderer->updateVBO(true);
 	logger.info("Game loaded");
+}
+
+void Game::create(unsigned short chunk_size)
+{
+	count++;
+	SaveManager::current.id = count;
+	*terrain->width = chunk_size;
+	*terrain->height = chunk_size;
+	terrain->chunks->clear();
+
+	// First chunk
+	terrain->generate(0, 0);
 }

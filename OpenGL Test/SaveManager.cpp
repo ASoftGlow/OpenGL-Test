@@ -25,13 +25,11 @@ void SaveManager::load(int id)
 	default:
 		// id
 		file.read((char*)&current.id, sizeof(int));
-		// width
-		file.read((char*)&current.width, sizeof(unsigned));
-		// height
-		file.read((char*)&current.height, sizeof(unsigned));
+		// size
+		file.read((char*)&current.chunk_size, sizeof(short));
 
 		// tiles
-		const size_t size = (size_t)current.width * current.height * TILE_SIZE;
+		/*const size_t size = (size_t)current.chunk_size * current.whuc * TILE_SIZE;
 		char* tile_data = new char[size];
 		current.tileData.clear();
 		current.tileData.reserve(current.width * current.height);
@@ -44,19 +42,13 @@ void SaveManager::load(int id)
 				Tile{
 					(TileType)tile_data[i + 0]
 				});
-		}
+		}*/
 
-		delete[] tile_data;
+		//delete[] tile_data;
 		break;
 	}
 
 	file.close();
-}
-
-void SaveManager::save(int id)
-{
-	current.id = id;
-	save();
 }
 
 void SaveManager::save()
@@ -64,10 +56,8 @@ void SaveManager::save()
 	const std::filesystem::path dir{ std::filesystem::current_path().string() + "\\saves\\" + std::to_string(current.id) };
 	const std::string filePath = dir.string() + "\\game.data";
 
-	if (!std::filesystem::exists(dir))
-	{
-		std::filesystem::create_directory(dir);
-	}
+	if (!std::filesystem::exists(dir.string() + "\\chunks\\"))
+		std::filesystem::create_directory(dir.string() + "\\chunks\\");
 
 	std::ofstream file;
 	file.open(filePath, std::ios::out | std::ios::binary);
@@ -84,22 +74,20 @@ void SaveManager::save()
 	default:
 		// id
 		file.write((char*)&current.id, sizeof(int));
-		// width
-		file.write((char*)&current.width, sizeof(unsigned));
-		// height
-		file.write((char*)&current.height, sizeof(unsigned));
-		
+		// size
+		file.write((char*)&current.chunk_size, sizeof(short));
+
 		// tiles
-		const size_t size = (size_t)current.width * current.height * TILE_SIZE;
+		/*const size_t size = (size_t)current.chunk_size * current.chunk_size * TILE_SIZE;
 		char* tile_data = new char[size];
 
-		for (size_t i = 0; i < (size_t)current.width * current.height; i += TILE_SIZE)
+		for (size_t i = 0; i < (size_t)current.chunk_size * current.chunk_size; i += TILE_SIZE)
 		{
 			Tile* tile = &SaveManager::current.tileData[i];
 			tile_data[i + 0] = tile->type;
 		}
 
-		file.write(tile_data, size);
+		file.write(tile_data, size);*/
 
 		break;
 	}

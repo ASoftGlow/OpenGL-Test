@@ -7,9 +7,6 @@
 
 #include "Game.h"
 #include "resources.hpp"
-#include <iomanip>
-#include <random>
-#include <string>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);

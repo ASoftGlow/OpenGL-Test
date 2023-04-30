@@ -15,6 +15,7 @@ public:
 	void init();
 	void update();
 	void render();
+	void create(unsigned short chunk_size);
 	void save();
 	void load();
 

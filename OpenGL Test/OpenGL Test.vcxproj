@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\..\OpenGL\src\glad.c" />
+    <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
@@ -36,8 +37,10 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="Logger.h" />
+    <ClInclude Include="Chunk.h" />
     <ClInclude Include="resources.hpp" />
     <ClInclude Include="Save.h" />
+    <ClInclude Include="SaveManager.h" />
     <ClInclude Include="shader_c.h" />
     <ClInclude Include="sprite_renderer.h" />
     <ClInclude Include="terrain.h" />
