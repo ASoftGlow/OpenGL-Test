@@ -1,4 +1,3 @@
-#include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -25,9 +24,9 @@ std::string Resources::loadFromFile(const char* filePath)
 
 		// read file's buffer contents into streams
 		fileStream << file.rdbuf();
-		
+
 		file.close();
-		
+
 		code = fileStream.str();
 	}
 	catch (std::ifstream::failure& e)
@@ -66,7 +65,7 @@ Texture Resources::loadTextureFromFile(const char* filePath, bool alpha, bool fl
 	stbi_set_flip_vertically_on_load(flip);
 
 	int width, height, nrChannels;
-	unsigned char*  data = stbi_load(filePath, &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(filePath, &width, &height, &nrChannels, 0);
 
 	if (!data)
 	{
@@ -74,7 +73,7 @@ Texture Resources::loadTextureFromFile(const char* filePath, bool alpha, bool fl
 	}
 
 	t.generate(width, height, data);
-	
+
 	stbi_image_free(data);
 
 	return t;
@@ -122,7 +121,80 @@ void Resources::clear()
 {
 	for (auto iter : shaders)
 		glDeleteProgram(iter.second.ID);
-	
+
 	for (auto iter : textures)
 		glDeleteTextures(1, &iter.second.ID);
+}
+
+void Resources::save(Terrain* terrain, const char* filePath)
+{
+	const unsigned size = sizeof(char) * 3 + sizeof(char) * (1) * terrain->width * terrain->height;
+	// process data
+	char* data = new char[size];
+
+	// version
+	data[0] = (char)1;
+	// width
+	data[1] = (char)terrain->width;
+	// height
+	data[2] = (char)terrain->height;
+	// tile data
+	for (unsigned i = 0; i < terrain->width * terrain->height; i++)
+	{
+		data[3 + i] = (char)terrain->getData()->at(i).type;
+	}
+	/*for (Tile t : *terrain->getData())
+	{
+		data += t.type;
+	}*/
+	//std::cout << data << std::endl;
+
+	// save to file
+	std::ofstream file;
+	file.open(filePath, std::ios::out | std::ios::binary);
+	file.write(data, size);
+	file.close();
+
+	delete[] data;
+}
+
+void Resources::load(Terrain* terrain, const char* filePath)
+{
+	std::ifstream file;
+	file.open(filePath, std::ios::in | std::ios::binary | std::ios::ate);
+	if (!file.is_open()) {
+		std::cout << "Failed to open file." << std::endl;
+		return;
+	}
+	std::streampos size = file.tellg();
+	char* memblock = new char[size];
+	file.seekg(0, std::ios::beg);
+	file.read(memblock, size);
+	file.close();
+
+	// process data
+	const char version = memblock[0];
+
+	switch (version)
+	{
+	case 1:
+	default:
+		const unsigned width = (unsigned)memblock[1];
+		const unsigned height = (unsigned)memblock[2];
+
+		std::vector<Tile> tileData;
+		tileData.reserve(width * height);
+
+		for (unsigned int i = 0; i < width * height; i++)
+		{
+			tileData.push_back(Tile{ (TileType)memblock[3 + i] });
+		}
+		delete terrain;
+		terrain = new Terrain{ width, height };
+		terrain->loadData(tileData);
+
+		break;
+	}
+
+	delete[] memblock;
 }

@@ -6,7 +6,7 @@ TerrainRenderer::TerrainRenderer(Shader shader, Terrain* terrain)
 	this->shader = shader;
 	this->terrain = terrain;
 
-	unsigned long len = this->terrain->height * this->terrain->width * 2 * 3 * 4;
+	const unsigned long len = this->terrain->height * this->terrain->width * 2 * 3 * 4;
 	this->vertices.resize(len);
 
 	this->initRenderData();
@@ -33,12 +33,19 @@ void TerrainRenderer::initRenderData()
 }
 
 
-void TerrainRenderer::updateVBO()
+void TerrainRenderer::updateVBO(bool resize)
 {
+	if (resize)
+	{
+		const unsigned long len = this->terrain->height * this->terrain->width * 2 * 3 * 4;
+		this->vertices.resize(len);
+	}
+
 	generateVertices();
 
 	glBindBuffer(GL_ARRAY_BUFFER, this->quadsVBO);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 
@@ -46,48 +53,31 @@ void TerrainRenderer::generateVertices()
 {
 	Tile* tile;
 	unsigned long long ind;
-	float pos_x, pos_y;
-	glm::vec4 pos;
-	glm::mat4 model;
-
-	const glm::mat4 projection = glm::ortho(-1.0f, 1.0f,
-		-1.0f, 1.0f, -1.0f, 1.0f);
-
 
 	// gen vertices
-	for (unsigned int y = 0; y != this->terrain->height; y++) {
-		for (unsigned int x = 0; x != this->terrain->width; x++)
+	for (unsigned y = 0; y != this->terrain->height; y++) {
+		for (unsigned x = 0; x != this->terrain->width; x++)
 		{
 			tile = this->terrain->getTile(x, y);
-			
-			// transformations
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(x, this->terrain->height - y, 0.0f));
-			
-			model = glm::translate(model, glm::vec3(0.5f, 0.5f, 0.0f));
-			model = glm::rotate(model, glm::radians(90.0f * tile->rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-			model = glm::translate(model, glm::vec3(-0.5f, -0.5f, 0.0f));
-
 
 			// 2 tri, 3 vert per
 			ind = (x + y * this->terrain->width) * 24;
 
 			for (char j = 0; j < 12; j += 2)
 			{
-				pos_x = quad_pos[j + 0];
-				pos_y = quad_pos[j + 1];
-
-				pos = projection * model * glm::vec4(pos_x, pos_y, 0.0f, 1.0f);
-
 				// pos
-				this->vertices[ind + j * 2 + 0] = pos.x;
-				this->vertices[ind + j * 2 + 1] = pos.y;
+				this->vertices[ind + j * 2 + 0] = quad_pos[j + 0] + x;
+				this->vertices[ind + j * 2 + 1] = quad_pos[j + 1] + this->terrain->height - y;
 
 				// tex
-				this->vertices[ind + j * 2 + 2] = (quad_tex[j + 0] + tile->type) / this->terrain->total_tiles;
-				this->vertices[ind + j * 2 + 3] = quad_tex[j + 1];
-			}
+				const char* tile_tex_pos = tiles_tex_pos[tile->type];
+				// Account for gap
+				this->vertices[ind + j * 2 + 2] =
+					((short)tile_tex_pos[0] * (tile_size + 2) + quad_tex[j + 0] * tile_size + 1) / (atlas_width * (tile_size + 2));
 
+				this->vertices[ind + j * 2 + 3] =
+					((short)tile_tex_pos[1] * (tile_size + 2) + quad_tex[j + 1] * tile_size + 1) / (atlas_height * (tile_size + 2));
+			}
 		}
 	}
 }

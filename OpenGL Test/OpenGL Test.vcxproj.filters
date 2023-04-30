@@ -57,6 +57,12 @@
     <ClCompile Include="sprite_renderer.cpp">
       <Filter>Rendering\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Rendering\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SaveManager.cpp">
+      <Filter>Rendering\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -80,32 +86,35 @@
     <ClInclude Include="terrain_renderer.h">
       <Filter>Rendering\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Wave Function Collapse\Wave Function Collapse\tile.h">
-      <Filter>Terrain Generation\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="terrain.h">
       <Filter>Terrain Generation\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utils.h">
       <Filter>Terrain Generation\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tile.h">
+      <Filter>Terrain Generation\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>Rendering\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Rendering\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Save.h">
+      <Filter>Rendering\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragment.frag">
-      <Filter>Rendering\Source Files\Shaders Files</Filter>
-    </None>
     <None Include="terrain.frag">
       <Filter>Rendering\Source Files\Shaders Files</Filter>
     </None>
     <None Include="terrain.vert">
       <Filter>Rendering\Source Files\Shaders Files</Filter>
     </None>
-    <None Include="vertex.vert">
-      <Filter>Rendering\Source Files\Shaders Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\atlas.png">
+    <Image Include="assets\atlas2.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

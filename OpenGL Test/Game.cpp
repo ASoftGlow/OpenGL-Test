@@ -1,14 +1,13 @@
 #include "Game.h"
 #include "resources.hpp"
-#include "sprite_renderer.h"
 
 
-TerrainRenderer* Renderer;
+TerrainRenderer* renderer;
 
 
 Game::~Game()
 {
-	delete Renderer;
+	delete renderer;
 }
 
 
@@ -23,36 +22,49 @@ void Game::init()
 	Resources::getShader("terrain")->use();
 	Resources::getShader("terrain")->setInt("image", 0);
 	Resources::getShader("terrain")->setMatrix4("projection", projection);
-	
-	// load textures
-	Resources::loadTexture("assets/atlas.png", true, "terrain_atlas", false);
 
-	// gen terrain
-	terrain = new Terrain{ 10,10 };
+	// load textures
+	Resources::loadTexture("assets/atlas2.png", true, "terrain_atlas", false);
+
+	// random_gen terrain
+	terrain = new Terrain{ 20,20 };
 	terrain->generate();
 
 	// create renderers
-	Renderer = new TerrainRenderer(*Resources::getShader("terrain"), terrain);
+	renderer = new TerrainRenderer(*Resources::getShader("terrain"), terrain);
 }
 
 
 void Game::render()
-{	
+{
 	// terrain
-	Renderer->drawTerrain(
+	renderer->drawTerrain(
 		*Resources::getTexture("terrain_atlas"),
-		400.0f,
-		400.0f,
+		400.0f + this->x * this->scale,
+		400.0f + this->y * this->scale,
 		this->scale * 8,
 		0.0f);
 
 	// sprites
-	//Renderer->DrawSprite(t, glm::vec2(200.0f, 200.0f), 200.0f, 45.0f);
+	//renderer->DrawSprite(t, glm::vec2(200.0f, 200.0f), 200.0f, 45.0f);
 }
 
 
 void Game::update()
 {
 	terrain->generate();
-	Renderer->updateVBO();
+	renderer->updateVBO(false);
+}
+
+void Game::save()
+{
+	Resources::save(terrain, "\\saves\\test\\game.data");
+	logger.info("Game saved");
+}
+
+void Game::load()
+{
+	Resources::load(terrain, "\\saves\\test\\game.data");
+	renderer->updateVBO(true);
+	logger.info("Game loaded");
 }
