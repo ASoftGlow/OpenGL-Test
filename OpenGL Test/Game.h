@@ -18,11 +18,13 @@ public:
 	void create();
 	void save();
 	void load();
+	void loadVisableChunks();
 
-	float scale = 8.0f;
+	int window_width, window_height;
+	float zoom = 2.f;
 
 //private:
-	float pan_speed = 1.25f;
+	float pan_speed = 1.0f;
 	float x = 0.f;
 	float y = 0.f;
 	Terrain* terrain;

@@ -6,7 +6,7 @@
 // A Chunk of tiles
 class Chunk {
 public:
-	Chunk();
+	Chunk() : x(0), y(0) {};
 	explicit Chunk(int x, int y, unsigned short* size);
 	Tile* getTile(unsigned short x, unsigned short y);
 

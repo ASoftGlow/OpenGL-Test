@@ -14,6 +14,12 @@ Terrain::Terrain(unsigned short* size_ptr, std::map<std::pair<int, int>, Chunk>*
 }
 
 
+void Terrain::init()
+{
+	tile_choices.resize((size_t)*height * *width);
+}
+
+
 std::vector<Choice>* Terrain::getChoices(unsigned x, unsigned y) {
 	return &tile_choices.at(static_cast<size_t>(y) * *width + x);
 }
@@ -43,9 +49,11 @@ void Terrain::findEasiestChoice(unsigned& x, unsigned& y, unsigned& size)
 Chunk* Terrain::getChunk(int x, int y)
 {
 	const std::pair<int, int> chunk_pos = std::pair<int, int>(x, y);
-	if (!chunks->contains(chunk_pos))
-		SaveManager::loadChunk(x, y);
-		return nullptr;
+	if (!chunks->contains(chunk_pos)) {
+		bool success = SaveManager::loadChunk(x, y);
+		if (!success)
+			return nullptr;
+	}
 	return &chunks->at(chunk_pos);
 }
 
@@ -58,7 +66,6 @@ void Terrain::generate(int chunk_x, int chunk_y) {
 	Choice ch;
 	std::discrete_distribution<> weighted_rand;
 
-	tile_choices.resize((size_t)*height * *width);
 	for (size_t i = 0; i != (size_t)*height * *width; i++)
 	{
 		tile_choices[i].resize(TerrainRenderer::atlas_size);
@@ -120,16 +127,19 @@ void Terrain::generate(int chunk_x, int chunk_y) {
 		}
 	}
 
-
+	int count = 0;
 	while (true)
 	{
+		count++;
 		findEasiestChoice(x, y, easiest_size);
-		if (easiest_size == 1) break;
+		if (easiest_size == 1) {
+			break;
+		}
 
 		// pick a choice and isolate it
 		chs = getChoices(x, y);
 		// get weights and setup random distribution
-		std::vector<char> weights;
+		std::vector<short> weights;
 		weights.reserve(chs->size());
 		for (Choice c : *chs)
 		{
@@ -147,7 +157,7 @@ void Terrain::generate(int chunk_x, int chunk_y) {
 	}
 
 	// clean up
-	this->tile_choices.clear();
+	//this->tile_choices.clear();
 }
 
 
@@ -210,6 +220,10 @@ void Terrain::collapse(Chunk* chunk, unsigned tile_x, unsigned tile_y) {
 			if (chs->size() == 1)
 			{
 				t->type = chs->at(0).type;
+			}
+			if (chs->size() == 0) {
+				std::cout << "MISSING ";
+				break;
 			}
 
 			h--;

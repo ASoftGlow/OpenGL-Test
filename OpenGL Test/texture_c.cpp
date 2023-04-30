@@ -3,7 +3,7 @@
 
 Texture::Texture() 
 	: width(0), height(0), internal_format(GL_RGB), image_format(GL_RGB), 
-	wrap_S(GL_CLAMP_TO_EDGE), wrap_T(GL_CLAMP_TO_EDGE),min_filter(GL_NEAREST), max_filter(GL_NEAREST)
+	wrap_S(GL_CLAMP_TO_EDGE), wrap_T(GL_CLAMP_TO_EDGE),min_filter(GL_LINEAR), max_filter(GL_NEAREST)
 {
 	glGenTextures(1, &ID);
 }

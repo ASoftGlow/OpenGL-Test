@@ -16,15 +16,15 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
 
 
-Game game;
-
-int WINDOW_WIDTH = 600, WINDOW_HEIGHT = 600;
+int inital_window_width = 600, inital_window_height = 600;
 bool press = false;
 double mouse_pos_old_x;
 double mouse_pos_old_y;
 float game_pos_old_x;
 float game_pos_old_y;
 bool panning = false;
+
+Game game;
 
 
 int main()
@@ -38,7 +38,7 @@ int main()
 	//glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, 1);
 	//glfwWindowHint(GLFW_DECORATED, 0);
 
-	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Wave Function Collapse | OpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(inital_window_width, inital_window_height, "Wave Function Collapse | OpenGL", NULL, NULL);
 	if (window == NULL)
 	{
 		printf("Failed to create GLFW window");
@@ -53,6 +53,9 @@ int main()
 	glfwSwapInterval(1); // vsync
 	//glfwSetWindowOpacity(window, 0.5f);
 
+	//GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+	//glfwSetCursor(window, cursor);
+	glfwSetCursorPos(window, inital_window_width, inital_window_height);
 
 	// icon
 	GLFWimage images[3] = {
@@ -73,6 +76,9 @@ int main()
 	}
 
 	srand((unsigned)time(0));
+
+	game.window_width = inital_window_width;
+	game.window_height = inital_window_height;
 	game.init();
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -81,7 +87,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
-		//glfwGetFramebufferSize(window, &WINDOW_WIDTH, &WINDOW_HEIGHT);
+		glfwGetFramebufferSize(window, &game.window_width, &game.window_height);
 		game.update();
 
 
@@ -116,9 +122,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	game.scale += static_cast<float>(yoffset);
-	if (game.scale < 1)  game.scale = 1;
-	if (game.scale > 32) game.scale = 32;
+	game.zoom += game.zoom / (float)yoffset / (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) ? 8 : 32 * 4);
+	if (game.zoom < 0.8)  game.zoom = 0.8;
+	if (game.zoom > 32) game.zoom = 32;
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -144,8 +150,8 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 		double x;
 		double y;
 		glfwGetCursorPos(window, &x, &y);
-		game.x = game_pos_old_x + (float)(x - mouse_pos_old_x) / game.scale * game.pan_speed;
-		game.y = game_pos_old_y + (float)(y - mouse_pos_old_y) / game.scale * game.pan_speed;
+		game.x = game_pos_old_x + (float)(x - mouse_pos_old_x) / game.zoom * game.pan_speed;
+		game.y = game_pos_old_y + (float)(y - mouse_pos_old_y) / game.zoom * game.pan_speed;
 	}
 }
 
@@ -163,7 +169,7 @@ void processInput(GLFWwindow* window)
 		if (press) return;
 		press = true;
 
-		game.update();
+		game.create();
 	}
 	else if (glfwGetKey(window, GLFW_KEY_4)) {
 		if (press) return;

@@ -14,16 +14,16 @@ class TerrainRenderer
 public:
 	TerrainRenderer(Shader shader, Terrain* terrain);
 
-	void drawTerrain(Texture& atlas, float x, float y, float scale = 1.0f, float rotation = 0.0f);
+	void drawTerrain(Texture& atlas, Texture& foliage, float x, float y, float scale = 1.0f, float rotation = 0.0f);
 	void updateVBO();
 
 	Terrain* terrain;
 
-	static const char atlas_width = 5;
-	static const char atlas_height = 3;
-	static const unsigned atlas_size = atlas_width * atlas_height;
+	static const char atlas_width = 9;
+	static const char atlas_height = 6;
 	static const char atlas_gap = 1;
 	static const char tile_size = 8;
+	static const unsigned atlas_size = 48;
 
 private:
 	void initRenderData();
@@ -50,7 +50,41 @@ private:
 		{1,1},
 		{1,2},
 		{0,0},
-		{3,1}
+		{3,1},
+		{0,3},
+		{1,3},
+		{5,3},
+		{5,4},
+		{5,5},
+		{4,3},
+		{4,5},
+		{2,5},
+		{2,3},
+		{3,3},
+		{4,4},
+		{3,5},
+		{2,4},
+		{0,5},
+		{0,4},
+		{1,4},
+		{1,5},
+		{8,3}, // sand/grass
+		{8,5},
+		{6,5},
+		{6,3},
+		{7,3},
+		{8,4},
+		{7,5},
+		{6,4},
+		{7,2},
+		{7,1},
+		{8,1},
+		{8,2},
+		{6,1},
+		{6,2},
+		{5,2},
+		{5,1},
+		{8,0} // missing
 	};
 	static constexpr float quad_pos[] = {
 		0.0f, 1.0f,

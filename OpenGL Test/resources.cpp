@@ -37,12 +37,11 @@ std::string Resources::loadFromFile(const char* filePath)
 }
 
 
-Shader Resources::loadShader(const char* vShaderPath, const char* fShaderPath, std::string name)
+Shader* Resources::loadShader(const char* vShaderPath, const char* fShaderPath, std::string name)
 {
-	Shader s;
-	s.compile(loadFromFile(vShaderPath).c_str(), loadFromFile(fShaderPath).c_str());
-	shaders[name] = s;
-	return s;
+	shaders[name] = Shader{};
+	shaders[name].compile(loadFromFile(vShaderPath).c_str(), loadFromFile(fShaderPath).c_str());
+	return &shaders[name];
 }
 
 

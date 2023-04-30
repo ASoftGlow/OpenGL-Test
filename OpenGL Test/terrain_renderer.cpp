@@ -81,15 +81,18 @@ void TerrainRenderer::generateVertices()
 }
 
 
-void TerrainRenderer::drawTerrain(Texture& atlas, float x, float y, float scale, float rotation)
+void TerrainRenderer::drawTerrain(Texture& atlas, Texture& foliage, float x, float y, float scale, float rotation)
 {
 	float newX, newY;
 	glm::mat4 model;
-	const size_t len = *this->terrain->height * *this->terrain->width * 3 * 2;
-	size_t count = 0;
+	const size_t len = (unsigned)*this->terrain->height * *this->terrain->width * 3 * 2;
+	size_t chunk_index = 0;
 
 	glActiveTexture(GL_TEXTURE0);
 	atlas.bind();
+	glActiveTexture(GL_TEXTURE1);
+	foliage.bind();
+
 	glBindVertexArray(this->quadVAO);
 
 	for (auto& [pos, chunk] : *this->terrain->chunks)
@@ -100,16 +103,16 @@ void TerrainRenderer::drawTerrain(Texture& atlas, float x, float y, float scale,
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(newX, newY, 0.0f));
 
-		//model = glm::translate(model, glm::vec3(0.5f * scale, 0.5f * scale, 0.0f));
+		//model = glm::translate(model, glm::vec3(0.5f * zoom, 0.5f * zoom, 0.0f));
 		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-		//model = glm::translate(model, glm::vec3(-0.5f * scale, -0.5f * scale, 0.0f));
+		//model = glm::translate(model, glm::vec3(-0.5f * zoom, -0.5f * zoom, 0.0f));
 
 		model = glm::scale(model, glm::vec3(scale, scale, 1.0f));
 
 		this->shader.setMatrix4("model", model);
 
-		glDrawArrays(GL_TRIANGLES, count * len, len);
-		count++;
+		glDrawArrays(GL_TRIANGLES, chunk_index * len, len);
+		chunk_index++;
 	}
 
 	glBindVertexArray(0);

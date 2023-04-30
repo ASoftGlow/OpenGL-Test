@@ -64,7 +64,7 @@ bool SaveManager::loadChunk(int x, int y)
 	current.chunks[std::pair<int, int>(x, y)] = Chunk{ x,y,&current.chunk_size };
 	Chunk* chunk = &current.chunks.at(std::pair<int, int>(x, y));
 
-	for (size_t i = 0; i < (unsigned)current.chunk_size * current.chunk_size; i += TILE_SIZE)
+	for (size_t i = 0; i < (size_t)current.chunk_size * current.chunk_size; i += TILE_SIZE)
 	{
 		if (tileData[i] < 0 || tileData[i] > 14)
 		{
@@ -78,6 +78,29 @@ bool SaveManager::loadChunk(int x, int y)
 
 	delete[] tileData;
 	return true;
+}
+
+void SaveManager::newSave(int id)
+{
+	current.id = id;
+	current.chunk_size = 16;
+	current.chunks.clear();
+	current.created_time = std::chrono::system_clock::now();
+	current.last_save_time = std::chrono::system_clock::now();
+}
+
+bool SaveManager::deleteSave(int id)
+{
+	const std::filesystem::path rootDir{ std::filesystem::current_path().string() + "\\saves\\" + std::to_string(id) };
+	return std::filesystem::remove_all(rootDir) > 0;
+}
+
+bool SaveManager::deleteAllSaves()
+{
+	const std::filesystem::path savesDir{ std::filesystem::current_path().string() + "\\saves" };
+	uintmax_t removedCount = std::filesystem::remove_all(savesDir) > 0;
+	std::filesystem::create_directory(savesDir);
+	return removedCount > 0;
 }
 
 bool SaveManager::save()
@@ -131,9 +154,6 @@ bool SaveManager::save()
 		switch (SaveManager::current.version)
 		{
 		case 1:
-
-			// tiles
-			//file.write(&current.version, sizeof(char));
 			for (Tile tile : chunk.tiles)
 			{
 				file.write(((char*)&tile.type), sizeof(char));
@@ -146,6 +166,9 @@ bool SaveManager::save()
 		}
 
 		file.close();
-		return true;
 	}
+
+	current.last_save_time = std::chrono::system_clock::now();
+
+	return true;
 }
