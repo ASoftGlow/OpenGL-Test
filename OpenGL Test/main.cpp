@@ -16,6 +16,7 @@
 #include "resources.hpp"
 
 #define MAX_SAVES_LIST_COUNT 7
+#define TITLE_PREFIX "Wave Function Collapse | OpenGL | "
 
 using namespace std::chrono;
 
@@ -25,7 +26,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
-void showMenuBar();
+void showMenuBar(GLFWwindow* window);
+void setTitle(GLFWwindow* window, const char* title);
 
 
 int inital_window_width = 600, inital_window_height = 600;
@@ -49,7 +51,7 @@ int main()
 	//glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, 1);
 	//glfwWindowHint(GLFW_DECORATED, 0);
 
-	GLFWwindow* window = glfwCreateWindow(inital_window_width, inital_window_height, "Wave Function Collapse | OpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(inital_window_width, inital_window_height, TITLE_PREFIX, NULL, NULL);
 	if (window == NULL)
 	{
 		printf("Failed to create GLFW window");
@@ -127,7 +129,7 @@ int main()
 		ImGui::ShowDemoWindow();
 		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 
-		showMenuBar();
+		showMenuBar(window);
 
 		/*ImGui::Begin(SaveManager::current.name);
 
@@ -158,14 +160,15 @@ int main()
 
 
 
-void showMenuBar()
+void showMenuBar(GLFWwindow* window)
 {
+	static const ImVec4 none_color{ 0.0f, 0.0f, 0.0f, 0.0f };
 	static const float BASE_TEXT_WIDTH = ImGui::CalcTextSize("A").x;
 	static const auto tz = current_zone();
-	static const ImU32 ERROR_BG_COLOR = ImGui::GetColorU32(ImVec4(0.4f, 0.0f, 0.0f, 0.65f));
 
 	static auto saves = SaveManager::getSavesList();
 	static bool show_new_save_popup = false;
+	static char name_buff[SAVE_NAME_SIZE];
 
 	// dir watcher
 	if (SaveManager::hasSavesDirChanged())
@@ -180,12 +183,8 @@ void showMenuBar()
 			if (ImGui::MenuItem("Save", "Ctrl+S"))
 			{
 				game.save();
-				saves = SaveManager::getSavesList();
-			}
-			if (ImGui::MenuItem("Save As"))
-			{
-				game.save();
-				saves = SaveManager::getSavesList();
+				if (!SaveManager::hasSavesDirChanged())
+					saves = SaveManager::getSavesList();
 			}
 			if (ImGui::BeginMenu("Load"))
 			{
@@ -196,6 +195,7 @@ void showMenuBar()
 				ImGui::TableSetupColumn("Name", 0, BASE_TEXT_WIDTH * 20);
 				ImGui::TableSetupColumn("Time");
 				ImGui::TableSetupColumn("Date");
+				static int renaming = -1;
 				int count = 0;
 				for (auto& save : saves)
 				{
@@ -205,7 +205,7 @@ void showMenuBar()
 						ImGui::TableSetColumnIndex(0);
 						ImGui::Text("...");
 						ImGui::SameLine();
-						filter.Draw("saves_list_filter", BASE_TEXT_WIDTH * 21);
+						filter.Draw("saves_list_filter", BASE_TEXT_WIDTH * SAVE_NAME_SIZE);
 						break;
 					}
 					if (!filter.PassFilter(save.name)) continue;
@@ -222,44 +222,71 @@ void showMenuBar()
 
 					if (has_error)
 						ImGui::BeginDisabled();
-					if (ImGui::Selectable(save.name, false, ImGuiSelectableFlags_SpanAllColumns))
+					if (renaming == save.id)
 					{
-						game.load(save.id);
+						ImGui::SetKeyboardFocusHere();
+
+						ImGui::PushItemWidth(BASE_TEXT_WIDTH * SAVE_NAME_SIZE);
+						ImGui::PushStyleColor(ImGuiCol_FrameBg, none_color);
+						if (ImGui::InputText("##rename", name_buff, sizeof(name_buff),
+							ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_NoHorizontalScroll))
+						{
+							renaming = -1;
+							if (strcmp(save.name, name_buff) != 0 && strlen(name_buff) > 0)
+							{
+								SaveManager::renameSave(save.id, save.version, name_buff);
+								strcpy(save.name, name_buff);
+							}
+						}
+						/*if (!ImGui::IsItemFocused())
+							renaming = -1;*/
+						ImGui::PopStyleColor();
+						ImGui::PopItemWidth();
 					}
-					if (has_error)
-						if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+					else {
+						if (ImGui::Selectable(save.name, false, ImGuiSelectableFlags_SpanAllColumns))
 						{
-							ImGui::EndDisabled();
-							ImGui::SetTooltip("Incompatible version (%i)", save.version);
-							ImGui::BeginDisabled();
+							game.load(save.id);
+							setTitle(window, save.name);
 						}
-					if (ImGui::BeginPopupContextItem())
-					{
-						//FIXME
-						if (ImGui::SmallButton("Duplicate"))
+						if (has_error)
+							if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+							{
+								ImGui::EndDisabled();
+								ImGui::SetTooltip("Incompatible version (%i)", save.version);
+								ImGui::BeginDisabled();
+							}
+						if (ImGui::BeginPopupContextItem())
 						{
-							SaveManager::current.id = SaveManager::newId();
-							SaveManager::save();
-							saves = SaveManager::getSavesList();
-						}
-						if (ImGui::SmallButton("Delete"))
-						{
-							SaveManager::deleteSave(save.id);
-							saves = SaveManager::getSavesList();
-						}
-						ImGui::Separator();
-						if (ImGui::SmallButton("Reveal Directory"))
-						{
+							if (ImGui::SmallButton("Rename"))
+							{
+								renaming = save.id;
+								strcpy(name_buff, save.name);
+								//ImGui::TableRow
+								ImGui::CloseCurrentPopup();
+							}
+							if (ImGui::SmallButton("Duplicate"))
+							{
+								SaveManager::duplicateSave(save.id);
+							}
+							if (ImGui::SmallButton("Delete"))
+							{
+								SaveManager::deleteSave(save.id);
+							}
+							ImGui::Separator();
+							if (ImGui::SmallButton("Reveal Directory"))
+							{
 #ifdef WIN32
-							ShellExecuteA(
-								NULL, "open", SaveManager::getSaveDir(save.id).string().c_str(),
-								NULL, NULL, SW_SHOWDEFAULT);
+								ShellExecuteA(
+									NULL, "open", SaveManager::getSaveDir(save.id).string().c_str(),
+									NULL, NULL, SW_SHOWDEFAULT);
 #else
-							const std::string cmd = "open " + SaveManager::getSaveDir(save.id).string();
-							std::system(cmd.c_str());
+								const std::string cmd = "open " + SaveManager::getSaveDir(save.id).string();
+								std::system(cmd.c_str());
 #endif
+							}
+							ImGui::EndPopup();
 						}
-						ImGui::EndPopup();
 					}
 					ImGui::TableSetColumnIndex(1);
 					const auto local = tz->to_local(save.last_save_time);
@@ -303,24 +330,30 @@ void showMenuBar()
 	}
 	if (ImGui::BeginPopupModal("New World"))
 	{
-		static char name[21];
-
-		ImGui::InputText("Name", name, 21);
+		ImGui::InputText("Name", name_buff, SAVE_NAME_SIZE);
 		if (ImGui::Button("Close"))
 			ImGui::CloseCurrentPopup();
 		ImGui::SameLine();
 		if (ImGui::Button("Create"))
 		{
-			if (name[0] != '\0')
+			if (name_buff[0] != '\0')
 			{
 				ImGui::CloseCurrentPopup();
 				game.create();
-				strcpy(SaveManager::current.name, name);
+				strcpy(SaveManager::current.name, name_buff);
+				setTitle(window, name_buff);
 			}
 		}
 		ImGui::EndPopup();
 	}
 	ImGui::PopStyleVar();
+}
+
+void setTitle(GLFWwindow* window, const char* _title)
+{
+	char title[sizeof(TITLE_PREFIX) + SAVE_NAME_SIZE] = TITLE_PREFIX;
+	strcat(title, _title);
+	glfwSetWindowTitle(window, title);
 }
 
 

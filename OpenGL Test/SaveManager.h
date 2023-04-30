@@ -29,6 +29,8 @@ public:
 	// TODO: error handling
 	// TODO: make it so existing saves aren't overridden
 	static void newSave(const char* name);
+	static int duplicateSave(int id);
+	static void renameSave(int id, char verison, const char* name);
 	/*
 	* Deletes the save with given id
 	* @returns `true` if 1 or more files were removed
@@ -44,14 +46,14 @@ public:
 		return path{ saveRoot(id) };
 	}
 	static bool hasSavesDirChanged();
-	static int newId() {
-		return rand();
-	}
 
 	inline static Save current;
 
 private:
 	static size_t getChunkBlockSize();
+	static int newId() {
+		return rand();
+	}
 
 	inline static const path saves_dir{ current_path().string() + "\\saves" };
 	inline static file_time_type write_time = last_write_time(saves_dir);

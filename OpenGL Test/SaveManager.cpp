@@ -1,12 +1,13 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <limits>
 
 #include "SaveManager.h"
 
 using namespace std::filesystem;
 
-const int CHUNKS_START_OFFSET = sizeof(char) + sizeof(char) * 21 + sizeof(time_t) * 2 + sizeof(short);
+const int CHUNKS_START_OFFSET = sizeof(char) + sizeof(char) * SAVE_NAME_SIZE + sizeof(time_t) * 2 + sizeof(short);
 
 
 size_t SaveManager::getChunkBlockSize()
@@ -136,6 +137,48 @@ void SaveManager::newSave(const char* name)
 	current.created_time = std::chrono::system_clock::now();
 	current.last_save_time = std::chrono::system_clock::now();
 	strcpy(current.name, name);
+}
+
+int SaveManager::duplicateSave(int sourceId)
+{
+	const int destId = newId();
+	const path sourceDir{ saveRoot(sourceId) };
+	const path destDir{ saveRoot(destId) };
+
+	copy(sourceDir, destDir, std::filesystem::copy_options::recursive);
+
+	return destId;
+}
+
+void SaveManager::renameSave(int id, char version, const char* name)
+{
+	const path filePath = saveRoot(id) / saveDataFile;
+
+	// Write game 
+	std::fstream file;
+	file.open(filePath, std::ios::in | std::ios::binary | std::ios::ate);
+	if (!file.is_open()) {
+		std::cerr << "Rename - " "Failed to open file (" << filePath << ")" << std::endl;
+		return;
+	}
+	const std::fpos_t size = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	char* buff = new char[size];
+	file.read(buff, size);
+	file.close();
+
+	switch (version)
+	{
+	case 1:
+		char* name_pos = buff + sizeof(char);
+		strcpy(name_pos, name);
+	}
+
+	file.open(filePath, std::ios::out | std::ios::binary);
+	file.write(buff, size);
+	delete[] buff;
+	file.close();
 }
 
 bool SaveManager::deleteSave(int id)

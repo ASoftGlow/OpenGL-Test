@@ -5,6 +5,8 @@
 #include <chrono>
 #include "Chunk.h"
 
+#define SAVE_NAME_SIZE 21
+
 struct Settings {
 	float pan_x = 0, pan_y = 0;
 };
@@ -12,7 +14,7 @@ struct Settings {
 struct Save {
 	char version = -1;
 	int id = -1;
-	char name[21];
+	char name[SAVE_NAME_SIZE];
 	std::chrono::time_point<std::chrono::system_clock> created_time;
 	std::chrono::time_point<std::chrono::system_clock> last_save_time;
 	std::map<std::pair<int, int>, Chunk> chunks;
@@ -23,7 +25,7 @@ struct Save {
 struct SavePreview {
 	char version;
 	int id;
-	char name[21];
+	char name[SAVE_NAME_SIZE];
 	std::chrono::time_point<std::chrono::system_clock> created_time;
 	std::chrono::time_point<std::chrono::system_clock> last_save_time;
 };
