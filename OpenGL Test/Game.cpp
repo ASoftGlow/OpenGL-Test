@@ -175,7 +175,10 @@ void Game::quit()
 
 void Game::importSave(const char* path)
 {
-	SaveManager::importSave(path);
+	if (SaveManager::importSave(path))
+		Logger::info((std::string("Imported save from ") + path).c_str());
+	else
+		Logger::error((std::string("Failed to imported save from ") + path).c_str());
 }
 
 void Game::exportSave(const char* path)

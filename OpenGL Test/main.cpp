@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <cmath>
 #include <iostream>
+#if _WIN32
 #include <Windows.h>
 #include <shellapi.h>
+#endif
 #include <chrono>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,13 +13,14 @@
 #include <ImGui/imgui_impl_glfw.h>
 #include <ImGui/imgui_impl_opengl3.h>
 #include <ImGui/imgui_internal.h>
+#include <filesystem>
 
 #include "game.h"
 #include "resources.hpp"
 #include "file_dialog.h"
 
-#define MAX_SAVES_LIST_COUNT 7
-#define TITLE_PREFIX "Wave Function Collapse | OpenGL | "
+constexpr auto MAX_SAVES_LIST_COUNT = 7;
+constexpr auto TITLE_PREFIX = "Wave Function Collapse | OpenGL | ";
 
 using namespace std::chrono;
 
@@ -29,6 +32,7 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
 void showMenuBar(GLFWwindow* window);
 void setTitle(GLFWwindow* window, const char* title);
+void parseCommandLineArgs(int argc, char* argv[]);
 
 
 int inital_window_width = 600, inital_window_height = 600;
@@ -44,18 +48,7 @@ Game game;
 
 int main(int argc, char* argv[])
 {
-	//// Parse command line arguments
-	/*for (int i = 1; i < argc; i++)
-	{
-		printf("Arg %i: %s\n", i, argv[i]);
-		if (strcmp(argv[i], "--open") == 0) 
-		{
-			game.load();
-			i++;
-			continue;
-		}
-	}*/
-
+	std::cout << std::filesystem::current_path() << std::endl;
 	// setup window
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -124,6 +117,8 @@ int main(int argc, char* argv[])
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+	parseCommandLineArgs(argc, argv);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
@@ -136,7 +131,7 @@ int main(int argc, char* argv[])
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 
 		showMenuBar(window);
 
@@ -290,7 +285,7 @@ void showMenuBar(GLFWwindow* window)
 							ImGui::Separator();
 							if (ImGui::SmallButton("Reveal Directory"))
 							{
-#ifdef WIN32
+#ifdef _WIN32
 								ShellExecuteA(
 									NULL, "open", SaveManager::getSaveDir(save.id).string().c_str(),
 									NULL, NULL, SW_SHOWDEFAULT);
@@ -318,7 +313,6 @@ void showMenuBar(GLFWwindow* window)
 			}
 			if (ImGui::MenuItem("Import"))
 			{
-				//TODO
 				char path[256];
 				if (BasicFileOpen(path) >= 0)
 				{
@@ -333,6 +327,7 @@ void showMenuBar(GLFWwindow* window)
 			if (ImGui::MenuItem("Save", "Ctrl+S"))
 			{
 				game.save();
+				setTitle(window, SaveManager::current.name);
 				if (!SaveManager::hasSavesDirChanged())
 					saves = SaveManager::getSavesList();
 			}
@@ -367,6 +362,7 @@ void showMenuBar(GLFWwindow* window)
 			if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S, 0, ImGuiInputFlags_RouteGlobalLow))
 			{
 				game.save();
+				setTitle(window, SaveManager::current.name);
 				saves = SaveManager::getSavesList();
 			}
 			else if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_N, 0, ImGuiInputFlags_RouteGlobalLow))
@@ -407,9 +403,16 @@ void showMenuBar(GLFWwindow* window)
 
 void setTitle(GLFWwindow* window, const char* _title)
 {
-	char title[sizeof(TITLE_PREFIX) + SAVE_NAME_SIZE] = TITLE_PREFIX;
-	strcat(title, _title);
-	glfwSetWindowTitle(window, title);
+	char* title = (char*)malloc(strlen(TITLE_PREFIX) + SAVE_NAME_SIZE + 1);
+	if (title != 0)
+	{
+		strcpy(title, TITLE_PREFIX);
+		strcat(title, _title);
+		if (SaveManager::current.id != -1 && !SaveManager::saved)
+			strcat(title, "*");
+		glfwSetWindowTitle(window, title);
+		free(title);
+	}
 }
 
 
@@ -478,6 +481,34 @@ void processInput(GLFWwindow* window)
 				game.pan_x -= game.pan_speed;
 			if (glfwGetKey(window, GLFW_KEY_A))
 				game.pan_x += game.pan_speed;
+		}
+	}
+}
+
+void parseCommandLineArgs(int argc, char* argv[])
+{
+	for (int i = 1; i < argc; i++)
+	{
+		printf("Arg %i: %s\n", i, argv[i]);
+		if (strcmp(argv[i], "--open") == 0)
+		{
+			if (i >= argc)
+				break;
+			errno = 0;
+			int id = strtol(argv[i + 1], nullptr, 10);
+			if (errno)
+				break;
+			game.load(id);
+			i++;
+			continue;
+		}
+		else if (strcmp(argv[i], "--import") == 0)
+		{
+			if (i >= argc)
+				break;
+			game.importSave(argv[i + 1]);
+			i++;
+			continue;
 		}
 	}
 }

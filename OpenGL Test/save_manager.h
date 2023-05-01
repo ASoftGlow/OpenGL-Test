@@ -4,10 +4,9 @@
 
 #include "save.h"
 
-#define GAME_DATA_FILE "world"
-#define GAME_COMPANY "ASoftGlow Software"
-#define GAME_NAME "Game"
-#define GAME_DEV
+constexpr auto GAME_DATA_FILE = "world";
+constexpr auto GAME_COMPANY = "ASoftGlow Software";
+constexpr auto GAME_NAME = "Game";
 
 using namespace std::filesystem;
 
@@ -51,14 +50,15 @@ public:
 	static bool exportSave(const char* path);
 
 	inline static Save current;
+	inline static bool saved = false;
 
 private:
 	static size_t getChunkBlockSize();
 	static int newId();
 	static file_time_type getSavesDirWriteTime();
 
-#ifndef GAME_DEV
-	inline static const path saves_dir{ std::string{ getenv("APPDATA") } + "\\" GAME_COMPANY "\\" GAME_NAME "\\saves" };
+#ifndef _DEBUG
+	inline static const path saves_dir{ std::string{ getenv("APPDATA") } + "\\" + GAME_COMPANY + "\\" + GAME_NAME + "\\saves" };
 #else
 	inline static const path saves_dir{ current_path() / "saves" };
 #endif

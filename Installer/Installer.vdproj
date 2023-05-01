@@ -21,6 +21,18 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_213F9EA9DC8B499495ABABDBEED561EF"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_269D06076BB44D9D8887ABA4B04F99DF"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_2B9971351DABB4CEB91DAD6D24C7D676"
         "OwnerKey" = "8:_BE0B7BBD15AE4F2ABDA658AFDEC36632"
         "MsmSig" = "8:_UNDEFINED"
@@ -76,6 +88,18 @@
         "Entry"
         {
         "MsmKey" = "8:_BE0B7BBD15AE4F2ABDA658AFDEC36632"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CF2CD102D2754E488131984E169C11DA"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D85ECDEF79A14137932B8E9062E43D97"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -142,11 +166,6 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
-                    {
-                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
-                    }
                 }
             }
         }
@@ -174,11 +193,6 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
-                    {
-                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
-                    }
                 }
             }
         }
@@ -220,6 +234,46 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_213F9EA9DC8B499495ABABDBEED561EF"
+            {
+            "SourcePath" = "8:C:\\vcpkg\\installed\\x64-windows\\bin\\zlib1.dll"
+            "TargetName" = "8:zlib1.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_CE5D6679A5B24AB19C687D9A91B88EBB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_269D06076BB44D9D8887ABA4B04F99DF"
+            {
+            "SourcePath" = "8:C:\\vcpkg\\installed\\x64-windows\\bin\\zip.dll"
+            "TargetName" = "8:zip.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_CE5D6679A5B24AB19C687D9A91B88EBB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2B9971351DABB4CEB91DAD6D24C7D676"
@@ -402,6 +456,46 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CF2CD102D2754E488131984E169C11DA"
+            {
+            "SourcePath" = "8:C:\\vcpkg\\installed\\x64-windows\\bin\\libzippp.dll"
+            "TargetName" = "8:libzippp.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_CE5D6679A5B24AB19C687D9A91B88EBB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D85ECDEF79A14137932B8E9062E43D97"
+            {
+            "SourcePath" = "8:C:\\vcpkg\\installed\\x64-windows\\bin\\bz2.dll"
+            "TargetName" = "8:bz2.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_CE5D6679A5B24AB19C687D9A91B88EBB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DDA22DE82F05F1E7AD4DB7C74EC45051"
             {
             "SourcePath" = "8:IMM32.dll"
@@ -543,7 +637,7 @@
                     {
                     "Command" = "8:&Import"
                     "Verb" = "8:import"
-                    "Arguments" = "8:\"%1\""
+                    "Arguments" = "8:\"--import\", \"%1\""
                     "Order" = "3:0"
                     }
                 }
@@ -679,7 +773,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Game"
         "ProductCode" = "8:{53E27E05-C240-4FCA-8B19-61FA8C9BFF44}"
-        "PackageCode" = "8:{DFB824F9-C196-436D-A5CD-51E1EE4C41FE}"
+        "PackageCode" = "8:{980A29B8-E8DA-41D2-B902-22905A99A777}"
         "UpgradeCode" = "8:{4C21474B-9313-4761-9E36-44FCEE0FE55D}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
@@ -691,7 +785,7 @@
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
         "Title" = "8:Game Installer"
-        "Subject" = "8:"
+        "Subject" = "8:game"
         "ARPCONTACT" = "8:ASoftGlow"
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
@@ -1214,7 +1308,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_BE0B7BBD15AE4F2ABDA658AFDEC36632"
             {
-            "SourcePath" = "8:..\\x64\\Release\\OpenGL Test.exe"
+            "SourcePath" = "8:..\\x64\\Debug\\OpenGL Test.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_CE5D6679A5B24AB19C687D9A91B88EBB"

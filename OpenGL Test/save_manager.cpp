@@ -6,6 +6,7 @@
 #include "libzippp/libzippp.h"
 
 #include "save_manager.h"
+#include "logger.h"
 
 using namespace std::filesystem;
 using namespace libzippp;
@@ -50,7 +51,7 @@ bool SaveManager::load(int id)
 	const path filePath = getSaveDir(id) / GAME_DATA_FILE;
 
 	std::ifstream file;
-	file.open(filePath, std::ios::in | std::ios::binary/* | std::ios::ate*/);
+	file.open(filePath, std::ios::in | std::ios::binary);
 	if (!file.is_open()) {
 		std::cerr << "Load - " "Failed to open file (" << filePath << ")" << std::endl;
 		return false;
@@ -85,6 +86,7 @@ bool SaveManager::load(int id)
 	file.close();
 	current.chunks.clear();
 
+	saved = true;
 	return true;
 }
 
@@ -132,7 +134,7 @@ bool SaveManager::loadChunk(int x, int y)
 		char* tileData = new char[chunk_block_size];
 
 		file.read((char*)tileData, chunk_block_size);
-		current.chunks[std::pair<int, int>(x, y)] = Chunk( x,y,current.chunk_size );
+		current.chunks[std::pair<int, int>(x, y)] = Chunk(x, y, current.chunk_size);
 		Chunk* chunk = &current.chunks.at(std::pair<int, int>(x, y));
 
 		for (size_t i = 0; i < chunk_block_size; i += TILE_SIZE)
@@ -158,12 +160,13 @@ bool SaveManager::loadChunk(int x, int y)
 
 void SaveManager::newSave(const char* name)
 {
+	saved = false;
 	current.version = version;
 	current.id = newId();
 	current.chunk_size = 16;
 	current.chunks.clear();
 	current.created_time = std::chrono::system_clock::now();
-	current.last_save_time = std::chrono::system_clock::now();
+	current.last_save_time = std::chrono::system_clock::from_time_t(1);
 	strcpy(current.name, name);
 }
 
@@ -338,35 +341,68 @@ bool SaveManager::save(int id)
 
 	file.close();
 
-
+	saved = true;
 	return true;
 }
 
 bool SaveManager::exportSave(const char* path)
 {
 	ZipArchive zf{ path };
-	zf.open(ZipArchive::New);
-
+	if (!zf.open(ZipArchive::New))
+		return false;
+	zf.setComment("Hello there :)");
 	zf.addFile(GAME_DATA_FILE, (getSaveDir(current.id) / GAME_DATA_FILE).string());
 
 	zf.close();
 	return true;
 }
 
-bool SaveManager::importSave(const char* path)
+bool SaveManager::importSave(const char* file_path)
 {
-	const int id = newId();
+	int count = 0;
+	path rootDir;
+	int id;
+	do {
+		count++;
+		id = newId();
+		rootDir = getSaveDir(id);
+	} while (exists(rootDir) && count != INT_MAX);
+	if (count == INT_MAX)
+	{
+		Logger::error("Max num saves reached\nHOW?!?");
+		return false;
+	}
 
-	ZipArchive zf{ path };
-	zf.open(ZipArchive::ReadOnly);
+	if (!exists(saves_dir))
+		create_directory(saves_dir);
+	create_directory(rootDir);
+
+	ZipArchive zf{ file_path };
+	if (!zf.open(ZipArchive::ReadOnly))
+		return false;
 
 	std::vector<ZipEntry> entries = zf.getEntries();
+	if (entries.size() == 0)
+		return false;
+
 	std::vector<ZipEntry>::iterator it;
 	for (it = entries.begin(); it != entries.end(); ++it) {
 		ZipEntry entry = *it;
-		std::string name = entry.getName();
+		if (entry.isFile())
+		{
+			const path output_path = rootDir / entry.getName();
+			std::ofstream file(output_path, std::ios::out | std::ios::binary);
+			const int result = entry.readContent(file);
+			file.close();
 
-		std::cout << name << std::endl;
+			if (result != LIBZIPPP_OK)
+			{
+				Logger::error("Load - " "Failed to import");
+				deleteSave(id);
+				zf.close();
+				return false;
+			}
+		}
 	}
 
 	zf.close();

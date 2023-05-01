@@ -10,7 +10,8 @@ class Terrain {
 public:
 	Terrain(unsigned short* pSize, std::map<std::pair<int, int>, Chunk>* chunks_ptr);
 	Chunk* getChunk(int x, int y);
-	void generateChunk(int chunk_x, int chunk_y);
+	// @param blend Uses existing chunks to blend borders
+	void generateChunk(int chunk_x, int chunk_y, bool blend = true);
 	void generateChunks(std::vector<std::pair<int, int>> chunks);
 	void init();
 

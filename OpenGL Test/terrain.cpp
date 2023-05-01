@@ -26,10 +26,10 @@ Chunk* Terrain::getChunk(int x, int y)
 	return &chunks->at(chunk_pos);
 }
 
-void Terrain::generateChunk(int x, int y)
+void Terrain::generateChunk(int x, int y, bool blend)
 {
-	ChunkGenerator cg(*chunk_size, &random_gen);
-	SaveManager::current.chunks[std::pair<int, int>(x, y)] = cg.generate(x, y);
+	ChunkGenerator cg(*chunk_size, &random_gen, chunks);
+	SaveManager::current.chunks[std::pair<int, int>(x, y)] = cg.generate(x, y, blend);
 }
 
 void Terrain::generateChunks(std::vector<std::pair<int, int>> chunks)
@@ -41,16 +41,22 @@ void Terrain::generateChunks(std::vector<std::pair<int, int>> chunks)
 	for (std::pair<int, int> c : chunks)
 	{
 		if (((long)c.first + (c.second % 2 == 0)) % 2 == 0)
-			pass1.push_back(c);
-		else
 			pass2.push_back(c);
+		else
+			pass1.push_back(c);
 	}
 
 	ctpl::thread_pool p(std::thread::hardware_concurrency());
 
 	// first pass
+	std::vector<std::future<void>> futures;
+	futures.reserve(pass1.size());
+
 	for (auto& [x, y] : pass1)
-		p.push([&, this](int id) { generateChunk(x, y); });
+		futures.push_back(p.push([&, this](int id) { generateChunk(x, y, false); }));
+	// wait for them to finish
+	for (auto& f : futures)
+		f.wait();
 
 	// second pass
 	for (auto& [x, y] : pass2)

@@ -4,7 +4,7 @@
 #include <chrono>
 #include "chunk.h"
 
-#define SAVE_NAME_SIZE 21
+constexpr auto SAVE_NAME_SIZE = 21;
 
 struct Save {
 	char version = -1;
