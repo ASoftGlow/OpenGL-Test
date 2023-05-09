@@ -18,9 +18,7 @@
 #include "game.h"
 #include "resources.hpp"
 #include "file_dialog.h"
-
-constexpr auto MAX_SAVES_LIST_COUNT = 7;
-constexpr auto TITLE_PREFIX = "Wave Function Collapse | OpenGL | ";
+#include "config.h"
 
 using namespace std::chrono;
 
@@ -42,13 +40,13 @@ double game_pos_old_x, game_pos_old_y;
 bool panning = false;
 bool wire_mode = false;
 bool show_fps = false;
+bool vsync = true;
 
 Game game;
 
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::filesystem::current_path() << std::endl;
 	// setup window
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -58,7 +56,7 @@ int main(int argc, char* argv[])
 	//glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, 1);
 	//glfwWindowHint(GLFW_DECORATED, 0);
 
-	GLFWwindow* window = glfwCreateWindow(inital_window_width, inital_window_height, TITLE_PREFIX, NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(inital_window_width, inital_window_height, GAME::TITLE_PREFIX, NULL, NULL);
 	if (window == NULL)
 	{
 		printf("Failed to create GLFW window");
@@ -70,7 +68,6 @@ int main(int argc, char* argv[])
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetCursorPosCallback(window, cursor_position_callback);
-	glfwSwapInterval(1); // vsync
 	//glfwSetWindowOpacity(window, 0.5f);
 
 	//GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
@@ -80,9 +77,9 @@ int main(int argc, char* argv[])
 
 	// icon
 	GLFWimage images[3] = {
-		Resources::textureFromFile("assets/icons/64.png", false),
-		Resources::textureFromFile("assets/icons/32.png", false),
-		Resources::textureFromFile("assets/icons/16.png", false)
+		Resources::textureFromFile(platform_paths::getStaticAppFolder() / "assets/icons/64.png", false),
+		Resources::textureFromFile(platform_paths::getStaticAppFolder() / "assets/icons/32.png", false),
+		Resources::textureFromFile(platform_paths::getStaticAppFolder() / "assets/icons/16.png", false)
 	};
 
 	glfwSetWindowIcon(window, 3, images);
@@ -121,6 +118,7 @@ int main(int argc, char* argv[])
 
 	while (!glfwWindowShouldClose(window))
 	{
+		glfwSwapInterval(vsync ? 1 : 0);
 		processInput(window);
 		glfwGetFramebufferSize(window, &game.window_width, &game.window_height);
 		game.update();
@@ -175,7 +173,7 @@ void showMenuBar(GLFWwindow* window)
 
 	static auto saves = SaveManager::getSavesList();
 	static bool show_new_save_popup = false;
-	static char name_buff[SAVE_NAME_SIZE];
+	static char name_buff[GAME::SAVE::NAME_SIZE];
 
 	// dir watcher
 	if (SaveManager::hasSavesDirChanged())
@@ -208,13 +206,13 @@ void showMenuBar(GLFWwindow* window)
 				int count = 0;
 				for (auto& save : saves)
 				{
-					if (++count > MAX_SAVES_LIST_COUNT)
+					if (++count > GAME::SAVE::MAX_LIST_COUNT)
 					{
 						ImGui::TableNextRow();
 						ImGui::TableSetColumnIndex(0);
 						ImGui::Text("...");
 						ImGui::SameLine();
-						filter.Draw("saves_list_filter", BASE_TEXT_WIDTH * SAVE_NAME_SIZE);
+						filter.Draw("saves_list_filter", BASE_TEXT_WIDTH * GAME::SAVE::NAME_SIZE);
 						break;
 					}
 					if (!filter.PassFilter(save.name)) continue;
@@ -235,7 +233,7 @@ void showMenuBar(GLFWwindow* window)
 					{
 						ImGui::SetKeyboardFocusHere();
 
-						ImGui::PushItemWidth(BASE_TEXT_WIDTH * SAVE_NAME_SIZE);
+						ImGui::PushItemWidth(BASE_TEXT_WIDTH * GAME::SAVE::NAME_SIZE);
 						if (ImGui::InputText("##rename", name_buff, sizeof(name_buff),
 							ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_NoHorizontalScroll))
 						{
@@ -287,7 +285,7 @@ void showMenuBar(GLFWwindow* window)
 							{
 #ifdef _WIN32
 								ShellExecuteA(
-									NULL, "open", SaveManager::getSaveDir(save.id).string().c_str(),
+									NULL, "open", platform_paths::getSaveFolder(save.id).string().c_str(),
 									NULL, NULL, SW_SHOWDEFAULT);
 #else
 								const std::string cmd = "open " + SaveManager::getSaveDir(save.id).string();
@@ -314,7 +312,7 @@ void showMenuBar(GLFWwindow* window)
 			if (ImGui::MenuItem("Import"))
 			{
 				char path[256];
-				if (BasicFileOpen(path) >= 0)
+				if (SUCCEEDED(ImportDialog(path)))
 				{
 					game.importSave(path);
 				}
@@ -331,13 +329,20 @@ void showMenuBar(GLFWwindow* window)
 				if (!SaveManager::hasSavesDirChanged())
 					saves = SaveManager::getSavesList();
 			}
+			if (!SaveManager::saved && SaveManager::current.id != -1)
+				ImGui::BeginDisabled();
 			if (ImGui::MenuItem("Export"))
 			{
-				//TODO
-				game.exportSave("C:\\Users\\hankv\\Documents\\test.zip");
+				char path[256];
+				if (SUCCEEDED(ExportDialog(path, SaveManager::current.name)))
+				{
+					game.exportSave(path);
+				}
 			}
 			else if (ImGui::IsItemHovered())
 				ImGui::SetTooltip("Exports save to a Glow Save File (.glowsave)");
+			if (!SaveManager::saved && SaveManager::current.id != -1)
+				ImGui::EndDisabled();
 			if (ImGui::MenuItem("Quit"))
 			{
 				game.quit();
@@ -352,6 +357,7 @@ void showMenuBar(GLFWwindow* window)
 		{
 			ImGui::MenuItem("Wire mode", 0, &wire_mode);
 			ImGui::MenuItem("FPS", 0, &show_fps);
+			ImGui::MenuItem("vsync", 0, &vsync);
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
@@ -378,7 +384,7 @@ void showMenuBar(GLFWwindow* window)
 	}
 	if (ImGui::BeginPopupModal("New World"))
 	{
-		ImGui::InputText("Name", name_buff, SAVE_NAME_SIZE);
+		ImGui::InputText("Name", name_buff, GAME::SAVE::NAME_SIZE);
 		if (ImGui::Button("Close"))
 		{
 			name_buff[0] = '\0';
@@ -403,10 +409,10 @@ void showMenuBar(GLFWwindow* window)
 
 void setTitle(GLFWwindow* window, const char* _title)
 {
-	char* title = (char*)malloc(strlen(TITLE_PREFIX) + SAVE_NAME_SIZE + 1);
+	char* title = (char*)malloc(strlen(GAME::TITLE_PREFIX) + GAME::SAVE::NAME_SIZE + 1);
 	if (title != 0)
 	{
-		strcpy(title, TITLE_PREFIX);
+		strcpy(title, GAME::TITLE_PREFIX);
 		strcat(title, _title);
 		if (SaveManager::current.id != -1 && !SaveManager::saved)
 			strcat(title, "*");

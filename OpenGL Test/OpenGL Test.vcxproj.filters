@@ -99,6 +99,9 @@
     <ClCompile Include="..\..\..\..\..\..\OpenGL\src\ImGui\imgui_widgets.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="platform_paths.cpp">
+      <Filter>Game\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader_c.h">
@@ -145,6 +148,12 @@
     </ClInclude>
     <ClInclude Include="chunk_generator.h">
       <Filter>Terrain Generation\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Game\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_paths.h">
+      <Filter>Game\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

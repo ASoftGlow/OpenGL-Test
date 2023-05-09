@@ -11,7 +11,7 @@
 std::map<std::string, Shader> Resources::shaders;
 std::map<std::string, Texture> Resources::textures;
 
-std::string Resources::loadFromFile(const char* filePath)
+std::string Resources::loadFromFile(path filePath)
 {
 	std::string code;
 	std::ifstream file;
@@ -37,7 +37,7 @@ std::string Resources::loadFromFile(const char* filePath)
 }
 
 
-Shader* Resources::loadShader(const char* vShaderPath, const char* fShaderPath, std::string name)
+Shader* Resources::loadShader(path vShaderPath, path fShaderPath, std::string name)
 {
 	shaders[name] = Shader{};
 	shaders[name].compile(loadFromFile(vShaderPath).c_str(), loadFromFile(fShaderPath).c_str());
@@ -51,7 +51,7 @@ Shader* Resources::getShader(std::string name)
 }
 
 
-Texture Resources::loadTextureFromFile(const char* filePath, bool alpha, bool flip)
+Texture Resources::loadTextureFromFile(path filePath, bool alpha, bool flip)
 {
 	Texture t;
 
@@ -64,11 +64,11 @@ Texture Resources::loadTextureFromFile(const char* filePath, bool alpha, bool fl
 	stbi_set_flip_vertically_on_load(flip);
 
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load(filePath, &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 0);
 
 	if (!data)
 	{
-		std::cout << "Failed to load texture" << std::endl;
+		printf("Failed to load texture (%s)\n", filePath.string().c_str());
 	}
 
 	t.generate(width, height, data);
@@ -85,28 +85,26 @@ void Resources::freeImageData(unsigned char* data)
 }
 
 
-GLFWimage Resources::textureFromFile(const char* file_path, bool flip)
+GLFWimage Resources::textureFromFile(path filePath, bool flip)
 {
 	stbi_set_flip_vertically_on_load(flip);
 
 	GLFWimage image;
 
-	image.pixels = stbi_load(file_path, &image.width, &image.height, 0, 4);
+	image.pixels = stbi_load(filePath.string().c_str(), &image.width, &image.height, 0, 4);
 
 	if (!image.pixels)
 	{
-		std::cout << "Failed to load texture" << std::endl;
+		printf("Failed to load texture (%s)\n", filePath.string().c_str());
 	}
 
 	return image;
 }
 
 
-Texture Resources::loadTexture(const char* filePath, bool alpha, std::string name, bool flip)
+Texture* Resources::loadTexture(path filePath, bool alpha, std::string name, bool flip)
 {
-	Texture t = loadTextureFromFile(filePath, alpha, flip);
-	textures[name] = t;
-	return t;
+	return &(textures[name] = loadTextureFromFile(filePath, alpha, flip));
 }
 
 
@@ -123,4 +121,44 @@ void Resources::clear()
 
 	for (auto iter : textures)
 		glDeleteTextures(1, &iter.second.ID);
+}
+
+void Resources::saveScreenshotToFile(const char* fileName, int windowWidth, int windowHeight, int size, float scale)
+{
+	// TODO: https://stackoverflow.com/questions/25127751/opengl-read-pixels-faster-than-glreadpixels
+	if (size > windowWidth) size = windowWidth;
+	if (size > windowHeight) size = windowHeight;
+
+	const int x = (windowWidth - size) / 2;
+	const int y = (windowHeight - size) / 2;
+	const int fS = size * scale;
+	const int fD = (int)(1.0f / scale);
+	const int numberOfPixels = fS * fS * 3;
+	unsigned char* pixels = new unsigned char[numberOfPixels];
+
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadBuffer(GL_FRONT);
+
+	long count = 0;
+	for (int j = 0; j < size; j += fD)
+	{
+		for (int k = 0; k < size; k += fD)
+		{
+			glReadPixels(k + x, j + y, 1, 1, GL_BGR, GL_UNSIGNED_BYTE, pixels + count * 3);
+			count++;
+			//fwrite(pixel, 3, 1, outputFile);
+		}
+	}
+	//glReadPixels(x, y, size, size, GL_BGR, GL_UNSIGNED_BYTE, pixels);
+
+	FILE* outputFile = fopen(fileName, "w");
+	short header[] = { 0, 2, 0, 0, 0, 0, (short)fS, (short)fS, 24 };
+
+	fwrite(&header, sizeof(header), 1, outputFile);
+	fwrite(pixels, numberOfPixels, 1, outputFile);
+	fclose(outputFile);
+
+	delete[] pixels;
+
+	printf("Finish writing to file.\n");
 }

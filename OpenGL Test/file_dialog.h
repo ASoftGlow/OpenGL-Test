@@ -106,7 +106,7 @@ HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void** ppv)
 	return hr;
 }
 
-HRESULT BasicFileOpen(char* filePath)
+HRESULT ImportDialog(char* filePath)
 {
 	// CoCreate the File Open Dialog object.
 	IFileDialog* pfd = NULL;
@@ -134,45 +134,111 @@ HRESULT BasicFileOpen(char* filePath)
 					hr = pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM);
 					if (SUCCEEDED(hr))
 					{
-						// Set the file types to display only. Notice that, this is a 1-based array.
-						hr = pfd->SetFileTypes(1, allowed_file_types);
+						IKnownFolderManager* pkfm = NULL;
+						hr = CoCreateInstance(CLSID_KnownFolderManager, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pkfm));
 						if (SUCCEEDED(hr))
 						{
-							// Set the selected file type index to Word Docs for this example.
-							hr = pfd->SetFileTypeIndex(1);
+							// Get the known folder.
+							IKnownFolder* pKnownFolder = NULL;
+							hr = pkfm->GetFolder(FOLDERID_Downloads, &pKnownFolder);
 							if (SUCCEEDED(hr))
 							{
-								// Set the default extension to be ".doc" file.
-								hr = pfd->SetDefaultExtension(L"doc");
+								// File Dialog APIs need an IShellItem that represents the location.
+								IShellItem* psi = NULL;
+								hr = pKnownFolder->GetShellItem(0, IID_PPV_ARGS(&psi));
 								if (SUCCEEDED(hr))
 								{
-									// Show the dialog
-									hr = pfd->Show(NULL);
+									hr = pfd->SetFolder(psi);
 									if (SUCCEEDED(hr))
 									{
-										// Obtain the result, once the user clicks the 'Open' button.
-										// The result is an IShellItem object.
-										IShellItem* psiResult;
-										hr = pfd->GetResult(&psiResult);
+										// Set the file types to display only. Notice that, this is a 1-based array.
+										hr = pfd->SetFileTypes(1, allowed_file_types);
 										if (SUCCEEDED(hr))
 										{
-											PWSTR wFilePath = NULL;
-											hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH, &wFilePath);
-											if (wFilePath == NULL) return -1;
-											wcstombs(filePath, wFilePath, 256);
-											CoTaskMemFree(wFilePath);
-											psiResult->Release();
+											pfd->SetDefaultExtension(L"glowsave");
+											pfd->SetTitle(L"Import Save");
+											pfd->SetOkButtonLabel(L"Import");
+											// Show the dialog
+											hr = pfd->Show(NULL);
+											if (SUCCEEDED(hr))
+											{
+												// Obtain the result, once the user clicks the 'Open' button.
+												// The result is an IShellItem object.
+												IShellItem* psiResult;
+												hr = pfd->GetResult(&psiResult);
+												if (SUCCEEDED(hr))
+												{
+													PWSTR wFilePath = NULL;
+													hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH, &wFilePath);
+													if (wFilePath == NULL) return -1;
+													wcstombs(filePath, wFilePath, MAX_PATH);
+													CoTaskMemFree(wFilePath);
+													psiResult->Release();
+												}
+											}
 										}
 									}
+									psi->Release();
 								}
+								pKnownFolder->Release();
 							}
+							pkfm->Release();
 						}
 					}
 				}
-				// Unhook the event handler.
 				pfd->Unadvise(dwCookie);
 			}
 			pfde->Release();
+		}
+		pfd->Release();
+	}
+	return hr;
+}
+
+HRESULT ExportDialog(char* filePath, const char* save_name)
+{
+	// CoCreate the File Open Dialog object.
+	IFileSaveDialog* pfd = NULL;
+	HRESULT hr = CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
+
+	if (SUCCEEDED(hr))
+	{
+		// Set the file types to display only. Notice that, this is a 1-based array.
+		hr = pfd->SetFileTypes(1, allowed_file_types);
+		if (SUCCEEDED(hr))
+		{
+			hr = pfd->SetDefaultExtension(L"glowsave");
+			hr = pfd->SetTitle(L"Export Save");
+			hr = pfd->SetOkButtonLabel(L"Export");
+
+			// Set default file name
+			wchar_t wSaveName[21];
+
+			mbstowcs(wSaveName, save_name, 21);
+			if (wSaveName == NULL) return -1;
+
+			hr = pfd->SetFileName(wSaveName);
+			if (SUCCEEDED(hr))
+			{
+				// Show the dialog
+				hr = pfd->Show(NULL);
+				if (SUCCEEDED(hr))
+				{
+					// Obtain the result, once the user clicks the 'Open' button.
+					// The result is an IShellItem object.
+					IShellItem* psiResult;
+					hr = pfd->GetResult(&psiResult);
+					if (SUCCEEDED(hr))
+					{
+						PWSTR wFilePath = NULL;
+						hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH, &wFilePath);
+						if (wFilePath == NULL) return -1;
+						wcstombs(filePath, wFilePath, MAX_PATH);
+						CoTaskMemFree(wFilePath);
+						psiResult->Release();
+					}
+				}
+			}
 		}
 		pfd->Release();
 	}

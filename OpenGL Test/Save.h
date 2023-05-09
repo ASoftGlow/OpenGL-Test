@@ -3,13 +3,12 @@
 #include <map>
 #include <chrono>
 #include "chunk.h"
-
-constexpr auto SAVE_NAME_SIZE = 21;
+#include "config.h"
 
 struct Save {
 	char version = -1;
 	int id = -1;
-	char name[SAVE_NAME_SIZE];
+	char name[GAME::SAVE::NAME_SIZE];
 	std::chrono::time_point<std::chrono::system_clock> created_time;
 	std::chrono::time_point<std::chrono::system_clock> last_save_time;
 	std::map<std::pair<int, int>, Chunk> chunks;
@@ -19,7 +18,7 @@ struct Save {
 struct SavePreview {
 	char version;
 	int id;
-	char name[SAVE_NAME_SIZE];
+	char name[GAME::SAVE::NAME_SIZE];
 	std::chrono::time_point<std::chrono::system_clock> created_time;
 	std::chrono::time_point<std::chrono::system_clock> last_save_time;
 };

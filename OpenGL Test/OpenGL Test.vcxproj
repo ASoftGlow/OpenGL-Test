@@ -32,6 +32,7 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="platform_paths.cpp" />
     <ClCompile Include="resources.cpp" />
     <ClCompile Include="save_manager.cpp" />
     <ClCompile Include="shader_c.cpp" />
@@ -42,10 +43,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="chunk_generator.h" />
+    <ClInclude Include="config.h" />
     <ClInclude Include="file_dialog.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="chunk.h" />
+    <ClInclude Include="platform_paths.h" />
     <ClInclude Include="resources.hpp" />
     <ClInclude Include="save.h" />
     <ClInclude Include="save_manager.h" />

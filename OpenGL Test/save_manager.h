@@ -3,10 +3,7 @@
 #include <filesystem>
 
 #include "save.h"
-
-constexpr auto GAME_DATA_FILE = "world";
-constexpr auto GAME_COMPANY = "ASoftGlow Software";
-constexpr auto GAME_NAME = "Game";
+#include "platform_paths.h"
 
 using namespace std::filesystem;
 
@@ -42,9 +39,6 @@ public:
 	*/
 	static bool deleteAllSaves();
 	static std::vector<SavePreview> getSavesList();
-	static path getSaveDir(int id) {
-		return saves_dir / std::to_string(id);
-	}
 	static bool hasSavesDirChanged();
 	static bool importSave(const char* path);
 	static bool exportSave(const char* path);
@@ -57,10 +51,6 @@ private:
 	static int newId();
 	static file_time_type getSavesDirWriteTime();
 
-#ifndef _DEBUG
-	inline static const path saves_dir{ std::string{ getenv("APPDATA") } + "\\" + GAME_COMPANY + "\\" + GAME_NAME + "\\saves" };
-#else
-	inline static const path saves_dir{ current_path() / "saves" };
-#endif
+
 	inline static file_time_type write_time = getSavesDirWriteTime();
 };

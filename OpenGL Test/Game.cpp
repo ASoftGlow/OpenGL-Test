@@ -1,6 +1,6 @@
 #include "game.h"
 #include "resources.hpp"
-
+#include "platform_paths.h"
 
 TerrainRenderer* renderer;
 
@@ -15,7 +15,9 @@ Game::~Game()
 void Game::init()
 {
 	// load shaders
-	Shader* terrain_shader = Resources::loadShader("assets/shaders/terrain.vert", "assets/shaders/terrain.frag", "terrain");
+	Shader* terrain_shader = Resources::loadShader(
+		platform_paths::getStaticAppFolder() / "assets/shaders/terrain.vert",
+		platform_paths::getStaticAppFolder() / "assets/shaders/terrain.frag", "terrain");
 
 	// configure shaders
 	glm::mat4 projection = glm::ortho(0.0f, (float)window_width,
@@ -25,11 +27,11 @@ void Game::init()
 	terrain_shader->setMatrix4("projection", projection);
 
 	// load textures
-	Resources::loadTexture("assets/atlas2.png", true, "terrain_atlas", false);
+	Resources::loadTexture(platform_paths::getStaticAppFolder() / "assets/atlas2.png", true, "terrain_atlas", false);
 	terrain_shader->setInt("terrain_atlas", 0);
-	Resources::loadTexture("assets/foliage_mask.png", true, "foliage_mask", false);
+	Resources::loadTexture(platform_paths::getStaticAppFolder() / "assets/foliage_mask.png", true, "foliage_mask", false);
 	terrain_shader->setInt("foliage_mask", 1);
-	Resources::loadTexture("assets/icons.png", true, "icons", false);
+	Resources::loadTexture(platform_paths::getStaticAppFolder() / "assets/icons.png", true, "icons", false);
 
 	// random_gen terrain
 	terrain = new Terrain{
@@ -39,14 +41,6 @@ void Game::init()
 
 	// create renderers
 	renderer = new TerrainRenderer(*terrain_shader, terrain);
-
-	//create();
-	//SaveManager::newSave(3);
-	//SaveManager::load(3);
-	//save();
-	//terrain->init();
-	//loadVisableChunks();
-	//renderer->updateVBO();
 }
 
 
@@ -183,6 +177,9 @@ void Game::importSave(const char* path)
 
 void Game::exportSave(const char* path)
 {
-	SaveManager::exportSave(path);
+	if (SaveManager::exportSave(path))
+		Logger::info((std::string("Exported save to ") + path).c_str());
+	else
+		Logger::error((std::string("Failed to export save to ") + path).c_str());
 }
 
